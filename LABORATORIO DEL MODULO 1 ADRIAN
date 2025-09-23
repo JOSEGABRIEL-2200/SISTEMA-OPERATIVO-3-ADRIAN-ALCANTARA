@@ -1,0 +1,34 @@
+Practica 2: Configuración de parametros de red.
+─$ history
+    1  ip a
+    2  sudo ip addr add 192.168.1.50/24 dev eth0
+    3  sudo ip route add default via 192.168.1.1
+    4  ip a
+    5  sudo nano /etc/resolv.conf
+    6  ip a
+
+Practica 3: Gestion de Usuario y grupos
+ 
+sudo adduser gabriel 
+   10  user 
+   11  users
+   12  sudo usermoed - aG
+   13  sudo usermoed - aG sudo gabriel
+   14  sudo usermod - aG sudo gabriel
+   15  groups
+   16  sudo usermod -aG sudo gabriel
+   17  sudo groupadd guest 
+   18  sudo adduser visitante 
+   19  sudo usermod -aG guest visitante 
+   20  cat /etc/passwd | grep gabriel
+   21  cat /etc/passwd | grep visitante 
+   22  id gabriel
+   23  id visitante
+   24  cat /etc/group | grep guest
+   25  sudo deluser visitante 
+   26  sudo goupdel  guest
+   27  sudo groupdel  guest 
+   28  cat /etc/group | grep visitante
+   29  cat /etc/group | grep guest
+   30  cat /etc/passwd | grep visitante 
+

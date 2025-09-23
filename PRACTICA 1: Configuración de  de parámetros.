@@ -1,7 +1,0 @@
-─$ history
-    1  ip a
-    2  sudo ip addr add 192.168.1.50/24 dev eth0
-    3  sudo ip route add default via 192.168.1.1
-    4  ip a
-    5  sudo nano /etc/resolv.conf
-    6  ip a
