@@ -8,27 +8,46 @@ Practica 2: Configuración de parametros de red.
     6  ip a
 
 Practica 3: Gestion de Usuario y grupos
- 
-sudo adduser gabriel 
-   10  user 
-   11  users
-   12  sudo usermoed - aG
-   13  sudo usermoed - aG sudo gabriel
-   14  sudo usermod - aG sudo gabriel
-   15  groups
-   16  sudo usermod -aG sudo gabriel
-   17  sudo groupadd guest 
-   18  sudo adduser visitante 
-   19  sudo usermod -aG guest visitante 
-   20  cat /etc/passwd | grep gabriel
-   21  cat /etc/passwd | grep visitante 
-   22  id gabriel
-   23  id visitante
-   24  cat /etc/group | grep guest
-   25  sudo deluser visitante 
-   26  sudo goupdel  guest
-   27  sudo groupdel  guest 
-   28  cat /etc/group | grep visitante
-   29  cat /etc/group | grep guest
-   30  cat /etc/passwd | grep visitante 
+ sudo adduser jose 
+    8  sudo adduser JOSE 
+    9  sudo usermod -aG sudo jose 
+   10  sudo usermod -aG sudo JOSE 
+   11  id JOSE 
+   12  sudo groupadd guest 
+   13  sudo groupadd guestt 
+   14  sudo adduser -aG gusestt invitado  
+   15  sudo adduser invitado 
+   16  sudo adduser -aG gusestt invitado  
+   17  sudo usermod -aG gusestt invitado  
+   18  sudo usermod -aG gusett invitado  
+   19  sudo usermod -aG guestt invitado 
+   20  geten group guestt
+   21  getent group guestt
+   22  sudo deluser invitado 
+   23  sudo groupdel  guestt 
+   24  cat /etc/passwd | grep invitado 
+   25  getent group guestt
+
+Práctica 4: Gestión de Permisos de Archivos
+mkdir materia 
+   33  cd materia 
+   34  nano estudiante.txt
+   35  ls -l
+   36  chmod 700 estudiante.txt 
+   37  ls -l estudiante.txt
+   38  chmod 070  estudiante.txt 
+   39  ls -l estudiante.txt
+   40  mkdir ../materia 2
+   41  mkdir ../materia2
+   42  cp estudiante.txt ../materia2/
+   43  ls -l ../materia2
+   44  ls -l ../materia
+   45  ls -l ../materia2
+   46  cd .. 
+   47  rm -r materia 
+   48  ls
+   49  rm -r materia24
+   50  rm -r materia2
+   51  ls
+
 
