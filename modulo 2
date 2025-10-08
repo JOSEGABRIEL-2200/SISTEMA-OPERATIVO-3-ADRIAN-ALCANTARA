@@ -1,0 +1,59 @@
+PRACTICA: 1
+sudo su 
+   32  sudo apt update && sudo apte urgrade -y
+   33  cat /etc/apt/sources.list
+   34  ls /etc/apt/sources.list.d/
+   35  apt search bashtop 
+   36  sudo apt install bashtop -y
+   37  sudo add-apt-repository ppa:bashtop-monitor/bashtop\nsudo apt update\nsudo apt install bashtop -y
+   38  bashtop 
+   39  br
+   40  bl
+   41  bs
+   42  sudo apt purge bashtop -y
+   43  bashtop 
+   44  sudo autoremove -y
+   45  sudo apt  autoremove -y
+   46  clear 
+   
+PRACTICA: 2
+47 sudo croantab 
+   48  sudo crontab -eantab 
+   49  sudo crontab -e
+   50  sudo systemctl enable --now atd
+   51  sudo apt install at -y
+   52  sudo systemctl enable --now atd
+   53  ls /tmp
+   54  echo "rm -rf /tmp/* " | at now + 1 minute 
+   55  atq
+   56  ls /tmp
+   57  cleae 
+   58  clear 
+   
+  PRACTICA:3
+59 sudo fdisk -l
+   60  sudo fdisk /dev/sbd
+   61  sudo fdisk /dev/sdb
+   62  sudo fdisk /dev/sbd
+   63  sudo fdisk /dev/sdb
+   64  sudo fdisk /dev/sdb\\n
+   65  sudo apt update 
+   66  lsblk
+   67  fdisk /dev/sdb 
+   68  sudo su 
+   69  sudo fdisk -l
+   70  lsblk
+   71  sudo fdisk /dev/sdb
+   72  sudo mkfs.ext4 /dev/sdb1
+   73  sudo mkfs.ext4 /dev/sdbl
+   74  sudo mkfs.ext4 /dev/sdb1
+   75  lsblk
+   76  mkdir /home/kali/desktop/disco_practica 
+   77  mkdir /home/desktop/disco_practica 
+   78  mkdir /home/escritorio/disco_practica 
+   79  mkdir /home/kali/Escritorio/disco_practica  
+   80  sudo mkfs.ext4 /dev/sdb1
+   81  lsblk -f
+   82  mkdir ~/disco_practica
+   83  sudo mount /dev/sdb1 ~/disco_practica
+   84  df -h | grep sdb1
