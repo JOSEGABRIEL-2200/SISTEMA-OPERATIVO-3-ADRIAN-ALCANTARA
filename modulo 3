@@ -1,0 +1,143 @@
+practica 1: grub
+  219  sudo nano /etc/default/grub 
+  220  sudo update-grub  
+  221  sudo reboot
+En la linea que comiensa con linux /boot/vmlinuz...: rw init=/bin/bash 
+
+en el archivo de configuracion 
+mount -o remount,rw /
+passwd root 
+sync 
+reboot -f 
+
+practica 2 : scrit 
+  227  mkdir documentostrabajo 
+  228  cd documentostrabajo 
+  229  echo "archivo de prueba 1 " > archivo1.txt
+  230  echo "archivo de prueba 2 " > archivo2.txt
+  231  ls 
+  232  cd home/gabriel 
+  233  cd /home/gabriel 
+  234  mkdir backups  
+  235  ls 
+  236  nano backup_home.sh
+  237  chmod +x backup_home.sh
+  238  ./backup_home.sh
+  239  nano backup_home.sh
+  240  ./backup_home.sh
+  241  ls /home/gabriel/backups 
+  242  ./backup_home.sh
+  243  nano backup_home.sh
+  244  ./backup_home.sh
+  245  ls /home/gabriel/backups 
+  246  /home 
+  247  ls /home/gabriel/backups 
+  248  cd ..
+  249  nano backup_home.sh
+  250  cd ..
+  251  exit
+  252  ls 
+  253  nano backup_home.sh
+  254  mkdir pedrito 
+  255  clear 
+  256  ls 
+  257  nano backup_home.sh
+  258  chmod +x backup_home.sh
+  259  ls -lh ~/backups
+  260  ./backup_home.sh
+  261  ls -lh ~/backups
+  262  chmod +x backup_home.sh
+  263  ./backup_home.sh
+  264  ls -lh ~/backups
+  265  touch pedrito.txt
+  266  ls -lh ~/backups
+  267  ./backup_home.sh
+  268  ls -lh ~/backups
+  269  chmod +x backup_home.sh
+  270  nano backup_home.sh
+  271  ls -lh ~/pedrito 
+  272  ls -lh ~/pedrito.txt 
+  273  nano backup_home.sh
+  274  clear
+  275  nano backup_home.sh
+  276  chmod +x backup_home.sh
+  277  ./backup_home.sh
+  278  nano pedrito.txt
+  279  ls -lh ~/pedrito.txt
+  280  ls -lh ~/pedrito
+  281  ls -lh ~/pedrito.txt
+    nano backup_home.sh
+   ls -lh ~/pedrito.txt
+  285  nano ip_guardada.sh
+  286  chmod +x ip_guardada.sh 
+  287  ./ip_guardada.sh 
+  288  nano ip_guardada.sh
+  289  ./ip_guardada.sh 
+  290  nano ip_guardada.sh
+  291  ./ip_guardada.sh 
+  292  nano ip_guardada.sh
+  293  ./ip_guardada.sh 
+  294  cat ~/ESCRITORIO/rico 
+  295  cat ~/Escritorio/rico.txt  
+  296  chmod +x ip_guardada.sh 
+  297  ./ip_guardada.sh 
+  298  ifconfig 
+  299  cat ~/Escritorio/feliz.txt
+  300  less ~/Escritorio/feliz.txtt
+  301  nano feliz.txt
+  302  nano ip_guardada.sh
+  303  chmod +x ip_guardada.sh 
+  304  ./ip_guardada.sh 
+  305  cd /home/gabriel 
+  306  cd feliz.txt 
+
+
+#!/bin/bash
+
+FECHA_ACTUAL= $(date +"%d-%m-%Y: %H: %M ")
+pedrito"backup_home_${FECHA_ACTUAL }..tar.gz "
+pedrito="home/backups"
+
+mkdir -p "$pedrito"
+
+echo"creando backup de /home/$(whoami)... "
+tar -czf "pedrito.txt/$pedrito " -c /home "$(whoami)"
+
+#!/bin/bash
+
+echo "Ingrese el nombre del archivo (sin extensión):"
+read nombre_archivo
+
+# Definir la ruta del escritorio del usuario
+ESCRITORIO="$HOME/Escritorio"
+
+# Ejecutar ifconfig y guardar el resultado en el archivo
+ifconfig > "$ESCRITORIO/$nombre_archivo.txt"
+
+# Mensaje de confirmación
+echo "El resultado de ifconfig se ha guardado en $ESCRITORIO/$nombre_archivo.txt" 
+
+
+
+practica 3: SSH llave privada y publica 
+ifconfig 
+    sudo apt install openssh-server -y
+    sudo apt update 
+    clear 
+    sudo systemctl status ssh 
+    mkdir -p ~/ssh 
+    chmod 700 ~/ .ssh 
+    touch ~/authorized_keys 
+    chmod 600 ~/authorized_keys 
+    cd ~/.ssh
+    touch ~/authorized_keys  
+    chmod 600 ~/authorized_keys \n
+    sudo nano authorized_keys \n
+    cat authorized_keys 
+    clear 
+    cat authorized_keys 
+    sudo nano authorized_keys \n
+    cd ..
+    sudo nano authorized_keys \n
+
+
