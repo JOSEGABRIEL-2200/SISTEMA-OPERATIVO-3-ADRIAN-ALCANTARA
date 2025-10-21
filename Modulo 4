@@ -1,0 +1,96 @@
+Práctica 1: Instalación y Configuración de un Servidor Web Apache2/Nginx
+sudo apt update 
+  125  sudo apt install apache2 -y
+  126  sudo mkdir -p /var/www/holamundo
+  127  sudo nano /var/www/holamundo/index.html 
+  128  sudo nano /var/www/personal/index.html
+  129  sudo nano /var/www/doc_personal/index.html
+  130  sudo mkdir -p /var/www/doc_personal
+  131  sudo nano /var/www/doc_personal/index.html
+  132  sudo nano /etc/apache2/sites-available/holamundo.conf 
+  133  sudo nano /etc/apache2/ports.conf
+  134  sudo nano /etc/apache2/sites-available/doc_personal
+  135  sudo systemctl status apache2
+  136  sudo systemctl start apache2
+  137  sudo systemctl status apache2
+  138  sudo a2ensite holamundo.conf 
+  139  sudo a2ensite docpersonal.conf 
+  140  sudo a2ensite doc_personal.conf 
+  141  sudo nano /var/www/doc_personal/index.html
+  142  sudo mkdir -p /var/www/informacion 
+  143  sudo nano /var/www/informacion/index.html
+  144  sudo nano /var/www/doc_personal/index.html
+  145  sudo nano /var/www/informacion/index.html
+  146  sudo nano /etc/apache2/sites-available/informacion 
+  147  sudo nano /etc/apache2/sites-available/doc_personal
+  148  sudo nano /etc/apache2/sites-available/informacion 
+  149  sudo a2ensite informacion.conf 
+  150  sudo a2ensite holamundo.conf 
+  151  sudo a2ensite 000-default.conf 
+  152  sudo systemctl restart apache2
+  153  sudo systemctl restar apache2
+  154  sudo systemctl restart apache2
+  155  sudo systemctl status  apache2
+  156  sudo systemctl enable  apache2
+  157  sudo systemctl restart apache2
+  158  sudo systemctl status  apache2
+  159  sudo nano /etc/apache2/sites-available/holamundo.conf 
+  160  sudo systemctl restart apache2
+  161  sudo a2ensite 000-default.conf 
+  162  sudo a2ensite holamundo.conf 
+  163  sudo systemctl restart apache2
+  164  sudo a2ensite informacion.conf 
+  165  sudo nano /etc/apache2/sites-available/informacion.conf 
+  166  sudo nano /etc/apache2/sites-available/holamundo.conf 
+  167  sudo nano /etc/apache2/sites-available/informacion.conf 
+  168  sudo a2ensite informacion.conf 
+  169  sudo a2ensite holamundo.conf 
+  170  sudo a2ensite informacion.conf 
+  171  sudo a2ensite 000-default.conf 
+  172  sudo systemctl restart apache2
+  173  sudo nano /var/www/informacion/index.html\\n
+  174  sudo a2ensite 000-default.conf 
+  175  sudo systemctl stop apache2
+  176  sudo systemctl start apache2
+  177  sudo a2ensite holamundo.conf 
+  178  sudo a2ensite informacion.conf 
+  179  sudo systemctl 000-default.conf
+  180  sudo a2ensite  000-default.conf
+  181  sudo systemctl restart apache2
+  182  sudo systemctl status apache2
+
+Práctica 2: Instalación de un Servidor de Correos con Postfix
+
+ sudo apt update \\n
+   33  sudo apt install postfix mailutils libsasl2-modules -y
+   34  sudo systemctl stop postfix 
+   35  sudo nano /etc/postfix/sasl_passwd 
+   36  sudo nano /etc/postfix/main.cf
+   37  sudo postmap /etc/postfix/sasl_passwd
+   38  sudo chmod 600 /etc/postfix/sasl/passwd
+   39  sudo chmod 600 /etc/postfix/sasl_passwd
+   40  sudo systemctl start  postfix 
+   41  sudo systemctl status  postfix 
+   42  sudo systemctl enable  postfix 
+   43  echo "GABRIEL" | mail -s "pueba" felizg707@gmail.com
+   44  echo "GABRIEL" | mail -s "pueba" felizgabriel988@gmail.com 
+   45  echo "JOSE GABRIEL FELIZ MARIA 2025-0742" | mail -s "MambruSeFueALaGuerra" felizg707@gmail.com 
+   46  echo "JOSE GABRIEL FELIZ MARIA 2025-0742" | mail -s "MambruSeFueALaGuerra" os3conadrian@gmail.com
+
+Práctica 3: Instalación y Configuración de un Servidor de Impresión CUPS
+49  sudo apt update \n
+   50  sudo apt install cups printer-driver-cups-pdf ufw ssh -y
+   51  sudo usermod -aG lpadmin gabriel
+   52  sudo reboot 
+   53  sudo systemctl enable cups && sudo systemctl start cups 
+   54  sudo systemctl enable cups && sudo systemctl start cups ssh 
+   55  sudo ufw enable 
+   56  sudo ufw allow 631/tcp
+   57  sudo ufw allow ssh
+   58  sudo cupsctl --remote-admin --share-printers 
+   59  sudo systemctl restart cups 
+   60  ip a
+   61  sudo systemctl status cups 
+
+
+
