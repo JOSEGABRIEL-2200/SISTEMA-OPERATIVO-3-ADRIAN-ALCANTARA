@@ -160,4 +160,90 @@ vrrp_instance VI_1 {
         10.0.0.155/24     # La IP Flotante
     }
 }
-  
+
+
+practica 3
+ojo en cada servidor 
+
+sudo apt install -y apache2 
+sudo systemctl enable apache2 
+sudo systemctl start apache2 
+echo "<h1>Servicio Web Activo en Server 1 (MASTER)</h1>" | sudo tee /var/www/html/index.html 
+ echo "<h1>Servicio Web Activo en Server 2 (BACKUP)</h1>" | sudo tee /var/www/html/index.html 
+nano /etc/keepalived/check_apache.sh 
+#!/bin/bash 
+if systemctl is-active --quiet apache2; then 
+    exit 0  
+else 
+    exit 1  
+fi 
+
+chmod +x /etc/keepalived/check_apache.sh 
+
+sudo nano /etc/keepalived/keepalived.conf
+global_defs { 
+    router_id KALI_SRV1 
+    script_security nonroot  
+} 
+ 
+vrrp_script chk_apache { 
+    script "/etc/keepalived/check_apache.sh" 
+    interval 3 
+    weight -50                
+} 
+ 
+vrrp_instance VI_1 { 
+    state MASTER 
+    interface eth0 
+    virtual_router_id 51 
+    priority 101 
+    advert_int 1 
+    authentication { 
+        auth_type PASS 
+        auth_pass secret 
+    } 
+    
+    track_script { 
+        chk_apache 
+    } 
+    virtual_ipaddress { 
+        10.0.0.155/24 
+    } 
+} 
+
+kali 2
+global_defs { 
+    router_id KALI_SRV2 
+    script_security nonroot   
+} 
+ 
+vrrp_script chk_apache { 
+    script "/etc/keepalived/check_apache.sh" 
+    interval 3 
+    weight -50 
+} 
+ 
+vrrp_instance VI_1 { 
+    state BACKUP 
+    interface eth0 
+    virtual_router_id 51 
+    priority 100              
+    advert_int 1 
+    authentication { 
+        auth_type PASS 
+        auth_pass secret 
+    } 
+    # Asociación del script 
+    track_script { 
+        chk_apache 
+    } 
+    virtual_ipaddress { 
+        10.0.0.155/24 
+    } 
+} 
+
+para probar despues 
+sudo systemctl restart keepalived 
+sudo systemctl stop apache2 
+ 
+ 
