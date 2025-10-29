@@ -1,0 +1,163 @@
+practica 1 
+kali 1
+sudo systemctl status ssh
+  125  sudo systemctl start ssh
+  126  sudo systemctl status ssh
+  127  clear 
+  128  ifconfig 
+  129  ls 
+  130  cd prueba1
+  131  ls 
+  132  clear
+  133  ls 
+  134  date 
+  135  ls 
+  136  clear 
+  137  cat pedro.txt 
+  138  date 
+  139  cat pedro.txt 
+  140  clear 
+  141  cat pedro.txt 
+                            
+kali 2
+sudo systemctl ssh
+   86  sudo systemctl status ssh
+   87  sudo systemctl start  ssh
+   88  sudo systemctl status ssh
+   89  clear 
+   90  ifconfig 
+   91  ssh gabriel@10.0.0.136
+   92  ssh-keygen  
+   93  ssh-copy-id gabriel@10.0.0.136
+   94  exit 
+   95  ssh gabriel@10.0.0.136
+   96  clear 
+   97  sudo apt install rsync -y
+   98  cd Desktop 
+   99  mkdir prueba1
+  100  cd prueba1
+  101  touch archivo{1..100}.txt
+  102  ls 
+  103  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136: /home/gabriel/prueba1
+  104  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136: /home/gabriel
+  105  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136: /home/gabriel sending incremental file list 
+  106  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136: /home/gabriel 
+  107  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136 : /home/gabriel 
+  108  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136: /home/gabriel 
+  109  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136:/home/gabriel 
+  110  sudo nano /prueba_script.sh 
+  111  rsync -azp /home/gabriel/Desktop/prueba1 gabriel@10.0.0.136:/home/gabriel 
+  112  sudo nano /prueba_script.sh 
+  113  sudo schmod +x /prueba_script.sh 
+  114  sudo chmod +x /prueba_script.sh 
+  115  crontab
+  116  crontab -e
+  117  sudo chmod +x /prueba_script.sh 
+  118  crontab -e
+  119  touch pedro.txt
+  120  ls
+  121  sudo nano pedro.txt
+
+
+
+practica2 
+kali 1
+sudo nano /etc/keepalived/keepalived.conf
+  149  ifconfig 
+  150  sudo systemctl enable ssh 
+  151  clear 
+  152  sudo nano /etc/keepalived/keepalived.conf
+  153  sudo systemctl start keepalived 
+  154  sudo systemctl restart keepalived 
+  155  sudo systemctl enable  keepalived 
+  156  sudo systemctl status   keepalived 
+  157  sudo nano /etc/keepalived/keepalived.conf
+  158  sudo systemctl start keepalived 
+  159  sudo nano /etc/keepalived/keepalived.conf
+  160  sudo systemctl restart keepalived 
+  161  sudo systemctl enable keepalived 
+  162  sudo systemctl start keepalived 
+  163  sudo systemctl status keepalived 
+  164  ip a showw eth0
+  165  ip a show eth0
+  166  sudo nano /etc/keepalived/keepalived.conf
+  167  sudo systemctl restart keepalived 
+  168  sudo systemctl enable keepalived 
+  169  sudo systemctl start keepalived 
+  170  ip a show eth0
+  171  ip a
+  172  sudo nano /etc/keepalived/keepalived.conf
+  173  ip a show eth0
+  174  sudo systemctl restart keepalived 
+  175  sudo systemctl enable keepalived 
+  176  sudo systemctl start keepalived 
+  177  ip a show eth0
+  178  sudo systemctl stop keepalived 
+  179  sudo systemctl start keepalived 
+
+global_defs {
+    router_id KALI_SRV1
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0        # Confirma tu interfaz real
+    virtual_router_id 51  # ID del grupo (debe ser el mismo en ambos)
+    priority 101          # Más alto para ser MASTER
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass secret
+    }
+    virtual_ipaddress {
+        10.0.0.155/24     # La IP Flotante
+    }
+}
+
+
+kali 2
+sudo nano /etc/keepalived/keepalived.conf
+  131  sudo systemctl start keepalived 
+  132  sudo systemctl restart keepalived 
+  133  sudo systemctl enable keepalived 
+  134  sudo systemctl status  keepalived 
+  135  sudo systemctl start keepalived 
+  136  sudo systemctl restart  keepalived 
+  137  sudo nano /etc/keepalived/keepalived.conf
+  138  sudo systemctl restart  keepalived 
+  139  sudo systemctl enable keepalived 
+  140  sudo systemctl start keepalived 
+  141  ip a show eth0
+  142  sudo nano /etc/keepalived/keepalived.conf
+  143  sudo systemctl restart  keepalived 
+  144  sudo systemctl enable keepalived 
+  145  sudo systemctl start keepalived 
+  146  ip a show eth0
+  147  ip a
+  148  sudo nano /etc/keepalived/keepalived.conf
+  149  ip a show eth0
+  150  sudo systemctl restart  keepalived 
+  151  sudo systemctl enable keepalived 
+  152  sudo systemctl start keepalived 
+  153  ip a show eth0
+  154  sudo systemctl stop keepalived 
+  
+global_defs {
+    router_id KALI_SRV2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth0        # Confirma tu interfaz real
+    virtual_router_id 51
+    priority 100          # Más bajo para ser BACKUP
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass secret
+    }
+    virtual_ipaddress {
+        10.0.0.155/24     # La IP Flotante
+    }
+}
+  
