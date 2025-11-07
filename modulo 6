@@ -1,0 +1,44 @@
+Práctica 1: Cifrado con GPG2
+sudo apt update
+sudo apt install gnupg2 -y
+mkdir ~/criptografia_segura
+cd ~/criptografia_segura
+echo "Este es el contenido secreto de la empresa." > secreto.txt
+gpg --symmetric secreto.txt
+ls
+cat secreto.txt.gpg
+rm secreto.txt
+gpg secreto.txt.gpg
+cat secreto.txt
+
+Práctica 2: Firewalls (IPtables / UFW)
+sudo apt install apache2 vsftpd openssh-server -y
+sudo systemctl enable apache2 vsftpd ssh
+sudo systemctl start apache2 vsftpd ssh
+sudo ss -tuln
+sudo iptables -A INPUT -p tcp --dport 80 -j DROP
+sudo iptables -A INPUT -p tcp --dport 21 -j DROP
+sudo iptables -A INPUT -p tcp --dport 22 -j DROP
+sudo iptables -L -n -v
+sudo iptables -D INPUT -p tcp --dport 80 -j DROP
+sudo iptables -D INPUT -p tcp --dport 21 -j DROP
+sudo iptables -D INPUT -p tcp --dport 22 -j DROP
+sudo iptables -L -n -v
+sudo ufw enable
+sudo ufw deny 80/tcp
+sudo ufw deny 21/tcp
+sudo ufw deny 22/tcp
+sudo ufw status verbose
+sudo ufw delete deny 80/tcp
+sudo ufw delete deny 21/tcp
+sudo ufw delete deny 22/tcp
+sudo ufw status verbose
+
+Práctica 3: Detección con Suricata
+sudo add-apt-repository ppa:oisf/suricata-stable -y
+sudo apt update
+sudo apt install suricata -y
+suricata -V
+sudo touch /etc/suricata/rules/local.rules
+sudo suricata -i eth0 -c /etc/suricata/suricata.yaml -s /etc/suricata/rules/local.rules -D
+tail -f /var/log/suricata/fast.log
