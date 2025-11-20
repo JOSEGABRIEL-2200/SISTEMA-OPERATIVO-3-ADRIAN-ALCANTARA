@@ -1,0 +1,242 @@
+practica 1: : Compartir Archivos con NFS
+# 1. Instalar NFS Server
+sudo apt update
+sudo apt install nfs-kernel-server -y
+
+# 2. Crear el recurso y 100 archivos
+sudo mkdir -p /srv/OS3
+for i in {1..100}; do sudo touch /srv/OS3/Adrian${i}.txt; done
+
+# 3. Asignar permisos: nadie (nobody) como propietario para el mapeo de ID
+sudo chown -R nobody:nogroup /srv/OS3 
+sudo chmod -R 775 /srv/OS3 
+
+# 4. Configurar los Exports
+sudo nano /etc/exports 
+# Asegúrate de usar tu subred correcta (aquí se usa 10.0.0.0/24):
+/srv/OS3   10.0.0.0/24(rw,sync,no_subtree_check) 
+
+# 5. Aplicar y reiniciar
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server
+
+2. En VM Linux Cliente (Montaje y Persistencia)
+
+# 1. Instalar NFS Client
+sudo apt update
+sudo apt install nfs-common -y
+
+# 2. Crear el punto de montaje
+sudo mkdir -p /mnt/nfs_os3
+
+# 3. Montar el recurso (prueba)
+sudo mount 10.0.0.167:/srv/OS3 /mnt/nfs_os3
+
+# 4. Verificar: debe mostrar 100 archivos
+ls -l /mnt/nfs_os3 | grep Adrian | wc -l
+
+# 5. Persistencia: Agregar a /etc/fstab
+sudo nano /etc/fstab
+# Agregar la línea:
+10.0.0.167:/srv/OS3   /mnt/nfs_os3   nfs   defaults   0   0
+
+6. Prueba final de persistencia
+sudo umount /mnt/nfs_os3
+sudo systemctl daemon-reload  # Carga la nueva configuración de fstab
+sudo reboot                  # Al iniciar, verifica con 'ls /mnt/nfs_os3'
+
+
+
+practica 2: File Server con SAMBA
+sudo apt update
+sudo apt install samba -y
+2. Preparar el Terreno (Carpetas y Usuarios) Vamos a crear todo desde cero para que quede limpio.
+
+Crear la carpeta compartida:
+
+
+
+sudo mkdir -p /srv/samba/archivos_adrian
+Crear el grupo de seguridad:
+
+
+
+sudo groupadd grupo_samba
+Crear el usuario adrian (sin acceso a login de sistema, solo para Samba):
+
+
+
+sudo useradd -M -s /usr/sbin/nologin adrian
+sudo usermod -aG grupo_samba adrian
+Asignar contraseña de Samba al usuario: (Escribe una contraseña fácil de recordar para la práctica)
+
+
+
+sudo smbpasswd -a adrian
+3. Permisos (Lo más importante en Kali) Kali es estricto con los permisos. Vamos a darle propiedad al grupo.
+
+
+
+sudo chown -R root:grupo_samba /srv/samba/archivos_adrian
+sudo chmod -R 775 /srv/samba/archivos_adrian
+4. Configuración de smb.conf Vamos a editar el archivo de configuración.
+
+
+sudo nano /etc/samba/smb.conf
+Baja hasta el final del archivo (usa la flecha abajo) y pega este bloque exacto:
+
+Ini, TOML
+
+[ArchivosAdrian]
+   comment = Carpeta del Ministro en Kali
+   path = /srv/samba/archivos_adrian
+   browseable = yes
+   read only = no
+   guest ok = no
+   valid users = @grupo_samba
+   create mask = 0775
+   directory mask = 0775
+   force user = adrian 
+(Guarda con Ctrl + O, Enter y sal con Ctrl + X).
+
+5. Reiniciar Servicios
+
+
+
+sudo systemctl restart smbd nmbd
+6. El Truco de los 100 Archivos Vamos a la carpeta y creamos los 100 archivos en un segundo.
+
+
+cd /srv/samba/archivos_adrian
+sudo touch adrian{1..100}.txt
+(Verifica con ls, deberías ver una lluvia de archivos adrian).
+
+FASE 2: Mapeo en Windows (Cliente) 
+1. Buscar tu IP en Kali En tu terminal de Kali escribe:
+
+
+
+ip a
+Busca la IP de tu interfaz (generalmente eth0). Supongamos que es 192.168.1.50.
+
+2. Conectar la Unidad de Red
+
+Ve a tu máquina Windows.
+
+Abre el Explorador de Archivos, clic derecho en "Este Equipo" > "Conectar a unidad de red".
+
+Carpeta: \\192.168.1.50\ArchivosAdrian (Cambia la IP por la tuya).
+
+Marca "Conectar con otras credenciales".
+
+Dale a Finalizar.
+
+Credenciales:
+
+Usuario: adrian
+
+Contraseña: (La que pusiste en el paso smbpasswd).
+
+3. La Misión Secreta
+
+Al entrar, verás los 100 archivos.
+
+Busca adrian99.txt.
+Ábrelo y escribe:
+
+el zumzum de la carabela
+
+Guárdalo y ciérralo.
+
+FASE 3: Validación Final 
+Vuelve a tu terminal de Kali Linux para confirmar que el ataque... digo, la edición, fue exitosa.
+
+Ejecuta:
+
+
+
+cat /srv/samba/archivos_adrian/adrian99.txt
+Si la terminal te responde: el zumzum de la carabela
+
+
+practica 3: controlador de dominio 
+Instala y configura SAMBA como controlador de dominio, crea un usuario llamado teteretere y anade una VM de Windows a un dominio y loguearte cone se usuario en windows
+sudo apt update && sudo apt install -y samba samba-dsdb-modules samba-vfs-modules krb5-user krb5-config krb5-kdc krb5-admin-server dnsutils
+
+sudo nano /etc/hosts
+ponemos esta linea 10.0.0.133 dc.os3.inet
+
+configuramos el nombre del host
+sudo hostnamectl set-hostname dc.os3.inet
+sudo hostnamectl
+
+configurar kerberos
+sudo nano /etc/krb5.conf
+borramos todo con ctrl+k
+y ponemos
+
+[libdefaults]
+    default_realm = OS3.INET
+    dns_lookup_realm = false
+    dns_lookup_kdc = true
+
+[realms]
+    OS3.INET = {
+        kdc = dc1.os3.inet
+        admin_server = dc.os3.inet
+    }
+
+[domain_realm]
+    .os3.inet = OS3.INET
+    os3.inet = OS3.INET
+
+configuramos samba
+sudo mv /etc/samba/smb.conf /etc/samba/smb.confbk
+sudo samba-tool domain provision --use-rfc2307 --interactive
+le damos todo enter
+
+reiniciamos servicios samba
+sudo systemctl restart samba-ad-dc
+sudo systemctl start smbd
+sudo systemctl start nmbd
+
+creamos el usuario en Linux
+sudo useradd lanegracubana
+sudo passwd lanegracubana
+
+agregamos usuario a samba
+sudo smbpasswd -a lanegracubana
+sudo smbpasswd -e lanegracubana
+
+YA EN WINDOWS
+entramos un bloc de notas de administrador y abrimos el archivo de host
+C:\Windows\System32\drivers\etc\hosts
+agregamos esta linea al final
+ 10.0.0.133 dc.os3.inet
+
+
+Configura la dirección DNS en la red de la máquina Windows para que apunte a la IP del servidor Samba (10.0.0.133).
+
+Abre Centro de redes y recursos compartidos.
+
+Selecciona Cambiar configuración del adaptador.
+
+Haz clic derecho en tu adaptador de red y selecciona Propiedades.
+
+En Protocolo de Internet versión 4 (TCP/IPv4), haz clic en Propiedades.
+
+Configura el servidor DNS con la dirección 10.0.0.133
+
+
+luego verificamos todo con un nslookup dc.os3.inet
+
+luego nos unimos al dominio 
+
+Ve a Configuración del sistema -> Cambiar la configuración del sistema.
+
+En Miembros de dominio, ingresa os3.inet y haz clic en Aceptar.
+
+Ingresa las credenciales del administrador cuando se te solicite (usuario: Administrator, contra).
+
+
+luego de que se agregue al dominio nos pedirá reiniciar y al terminar el reinicio, agregamos otro usuario(lanegracubana)
