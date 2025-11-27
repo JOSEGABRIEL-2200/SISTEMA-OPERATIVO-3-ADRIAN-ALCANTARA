@@ -1,0 +1,142 @@
+PRACTICA 1 - INSTALACION Y CONFIGURACION DE DOCKER
+
+
+Instalar docker
+sudo apt update && sudo apt install -y docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+
+Verificar la instalación 
+docker --version
+
+Agregar mi usuario a docker (sin tener que reiniciar la maquina)
+sudo usermod -aG docker gabriel
+newgrp docker
+
+Descargar la imagen de NGINX desde Docker Hub
+docker pull nginx
+
+Crear el directorio persistente 
+mkdir -p /home/website 
+
+Crear un contenedor con NGINX
+docker run -d --name mi_nginx -p 8888:80 -v "/home/website:/usr/share/nginx/html" nginx
+
+Verificar el contenedor
+docker ps
+
+Crear el archivo  index.html
+
+sudo nano /home/website/index.html
+
+<html>
+<h1>nombre: JOSE GABRIEL FELIZ MARIA</h1>
+    <p>Matrícula: 2025-0742</p>
+</html>
+
+Reiniciar el contenedor 
+ 
+docker restart mi_pagina
+
+Verificar la pagina en el navegador de mi host
+
+entramos al localhost:8888
+
+probamos el docker
+detener
+docker stop nombre
+
+iniciamos nuevamente
+docker start nombre
+
+PRACTICA 2 - INSTALACION DE PORTAINER
+
+
+Descarga la imagen de portainer desde Docker Hub
+
+docker pull portainer/portainer-ce
+
+Crear un contenedor con esa imagen
+docker run -d --name portainer --restart always \
+  -p 9443:9443 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  portainer/portainer-ce
+
+
+docker restart portainer
+
+
+Acceder a la interfaz
+http://localhost:9443
+
+Nos conectamos al local, en "live connect"
+luego vamos a containers, buscamos mi_pagina
+y le damos en stop,  verificamos que si se haya detenido en 
+
+http://localhost:9443
+
+PRACTICA 3 - CONTENEDOR DE WORDPRESS
+
+
+Instalar docker y docker compose
+sudo apt update && sudo apt install docker.io docker-compose -y
+
+Crear la carpeta y dentro crear el archivo `docker-compose.yml`
+mkdir wordpress_docker
+cd wordpress_docker
+nano docker-compose.yml
+
+dentro del archivo 
+version: '3.8'
+
+services:
+  db:
+    image: mysql:latest
+    container_name: wordpress_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD: wordpress_password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wordpress_network
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress_app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - wordpress_network
+
+volumes:
+  db_data:  # <-- Aquí declaras el volumen
+  wordpress_data:
+
+networks:
+  wordpress_network:
+
+
+Luego ejecutamos el despliegue con 
+docker-compose up -d
+
+Acceder al navegador 
+http://localhost:8080
+entrar a wordpress
+
+verificar en el portainer el contenedor
+http://localhost:9443
