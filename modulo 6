@@ -1,44 +1,94 @@
-Práctica 1: Cifrado con GPG2
-sudo apt update
-sudo apt install gnupg2 -y
-mkdir ~/criptografia_segura
-cd ~/criptografia_segura
-echo "Este es el contenido secreto de la empresa." > secreto.txt
-gpg --symmetric secreto.txt
-ls
-cat secreto.txt.gpg
-rm secreto.txt
-gpg secreto.txt.gpg
-cat secreto.txt
+Practica.1 - Cifrado
+======================
+sudo apt install -y gnupg2
+echo "Este es un archivo secreto" > archivo.txt
+gpg2 -c archivo.txt              # cifrado simétrico
+rm archivo.txt                    # opcional, eliminar original
+gpg2 -d archivo.txt.gpg           # descifrado
+gpg2 -d archivo.txt.gpg > archivo_descifrado.txt  # guardar descifrado
+cat archivo_descifrado.txt #Ver contenido de archivo 
+=========================================
+Practica 2 - IP tables - UFW/Firewall-cmd 
+=========================================
+sudo apt install apache2 vsftpd openssh-server -y # Instalamos servicios si no lo tenemos activos
+sudo systemctl start apache2 #Iniciamos los servicios
+sudo systemctl start vsftpd
+sudo systemctl start ssh
+-----------------------------
+Verificamos el status
+sudo systemctl status apache2
+sudo systemctl status vsftpd
+sudo systemctl status ssh
+-----------------------------
+sudo ss -tuln | grep -E ':80|:21|:22' # Comprobar los puertos en uso 
 
-Práctica 2: Firewalls (IPtables / UFW)
-sudo apt install apache2 vsftpd openssh-server -y
-sudo systemctl enable apache2 vsftpd ssh
-sudo systemctl start apache2 vsftpd ssh
-sudo ss -tuln
-sudo iptables -A INPUT -p tcp --dport 80 -j DROP
+sudo iptables -A INPUT -p tcp --dport 80 -j DROP #Denegar trafico 
 sudo iptables -A INPUT -p tcp --dport 21 -j DROP
 sudo iptables -A INPUT -p tcp --dport 22 -j DROP
-sudo iptables -L -n -v
-sudo iptables -D INPUT -p tcp --dport 80 -j DROP
-sudo iptables -D INPUT -p tcp --dport 21 -j DROP
-sudo iptables -D INPUT -p tcp --dport 22 -j DROP
-sudo iptables -L -n -v
+
+sudo iptables -L -n --line-numbers #Comprobar las reglas
+
+sudo iptables -I INPUT 1 -p tcp --dport 22 -j ACCEPT #Aceptar trafico por esos puertos
+sudo iptables -I INPUT 1 -p tcp --dport 21 -j ACCEPT
+sudo iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT
+
+sudo iptables -F
+sudo iptables -X
+sudo ufw reset
+
+sudo apt install ufw -y #Instalar ufw 
 sudo ufw enable
-sudo ufw deny 80/tcp
+
+sudo ufw deny 80/tcp #Denegar el trafico con ufw
 sudo ufw deny 21/tcp
 sudo ufw deny 22/tcp
-sudo ufw status verbose
-sudo ufw delete deny 80/tcp
-sudo ufw delete deny 21/tcp
-sudo ufw delete deny 22/tcp
-sudo ufw status verbose
 
-Práctica 3: Detección con Suricata
-sudo add-apt-repository ppa:oisf/suricata-stable -y
-sudo apt update
-sudo apt install suricata -y
-suricata -V
-sudo touch /etc/suricata/rules/local.rules
-sudo suricata -i eth0 -c /etc/suricata/suricata.yaml -s /etc/suricata/rules/local.rules -D
-tail -f /var/log/suricata/fast.log
+sudo ufw status verbose # Ver estado de los comandos
+
+sudo ufw allow 80/tcp # Permitir el trafico nuevamente
+sudo ufw allow 21/tcp
+sudo ufw allow 22/tcp
+====================================
+Practica 3 -Instalacion de IDS snort 
+====================================
+sudo apt install snort -y #Instalar Snort
+snort -v #Verificar la version y si se instalo
+sudo nano /usr/local/etc/snort/snort.lua #Acceder al archivo de configuracion
+sudo snort -c  /etc/snort/snort.lua -i eth0 -A alert_fast # Poner a prueba el snort
+-----------------------------------------------------------------------------------
+Home_NET = '192.168.100.0/24'
+sudo nano /etc/snort/rules/local.rules
+
+variables = default_variables,
+    include = { "/etc/snort/rules/local.rules" },
+
+outputs = {
+    { type = 'alert_fast' },                -- alertas en consola
+    { type = 'file', filename = '/var/log/snort/snort.log' }  -- alertas en archivo
+}
+
+alert icmp any any -> any any (msg:"ICMP DETECTADO PAQUETE"; sid:1000001; rev:1;)
+
+alert tcp any any -> any 21 (msg:"FTP Intento de conexion detectada"; sid:1000002; rev:1;)
+
+alert tcp any any -> any 22 (msg:"SSH Intento de conexion detectada"; sid:1000003; rev:1;)
+
+alert tcp any any -> any 80 (msg:"HTTP Intento de conexion detectada"; sid:1000004; rev:1;)
+
+=================================================================================
+Practica 4: Configurar 2FA con google authenticator Modulo PAM para Acceso SSH
+=================================================================================
+sudo systemctl status ssh # Comprobar estado de ssh
+dpkg -l | grep libpam # Verificar si modulo pam esta instalado
+sudo apt install libpam-google-authenticator -y # Permite al PAM usar tokens TOTP (Time-based One-Time-Password)
+google-authenticator # Para configurar el ssh, a todo diremos que si 
+sudo nano /etc/pam.d/sshd # Para configurar el modulo pam en ssh
+auth required pam_google_authenticator.so # linea que agregaremos al final 
+sudo nano /etc/ssh/sshd_config # Configuraramos el modulo ahora de ssh y agregamos las siguientes lineas
+UsePAM yes
+ChallengeResponseAuthentication yes
+PasswordAuthentication yes
+sudo systemctl restart ssh
+sudo systemctl status ssh
+
+ssh usuario@ip_maquina
