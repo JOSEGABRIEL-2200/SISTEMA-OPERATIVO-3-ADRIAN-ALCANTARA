@@ -1,59 +1,113 @@
-PRACTICA: 1
-sudo su 
-   32  sudo apt update && sudo apte urgrade -y
-   33  cat /etc/apt/sources.list
-   34  ls /etc/apt/sources.list.d/
-   35  apt search bashtop 
-   36  sudo apt install bashtop -y
-   37  sudo add-apt-repository ppa:bashtop-monitor/bashtop\nsudo apt update\nsudo apt install bashtop -y
-   38  bashtop 
-   39  br
-   40  bl
-   41  bs
-   42  sudo apt purge bashtop -y
-   43  bashtop 
-   44  sudo autoremove -y
-   45  sudo apt  autoremove -y
-   46  clear 
-   
-PRACTICA: 2
-47 sudo croantab 
-   48  sudo crontab -eantab 
-   49  sudo crontab -e
-   50  sudo systemctl enable --now atd
-   51  sudo apt install at -y
-   52  sudo systemctl enable --now atd
-   53  ls /tmp
-   54  echo "rm -rf /tmp/* " | at now + 1 minute 
-   55  atq
-   56  ls /tmp
-   57  cleae 
-   58  clear 
-   
-  PRACTICA:3
-59 sudo fdisk -l
-   60  sudo fdisk /dev/sbd
-   61  sudo fdisk /dev/sdb
-   62  sudo fdisk /dev/sbd
-   63  sudo fdisk /dev/sdb
-   64  sudo fdisk /dev/sdb\\n
-   65  sudo apt update 
-   66  lsblk
-   67  fdisk /dev/sdb 
-   68  sudo su 
-   69  sudo fdisk -l
-   70  lsblk
-   71  sudo fdisk /dev/sdb
-   72  sudo mkfs.ext4 /dev/sdb1
-   73  sudo mkfs.ext4 /dev/sdbl
-   74  sudo mkfs.ext4 /dev/sdb1
-   75  lsblk
-   76  mkdir /home/kali/desktop/disco_practica 
-   77  mkdir /home/desktop/disco_practica 
-   78  mkdir /home/escritorio/disco_practica 
-   79  mkdir /home/kali/Escritorio/disco_practica  
-   80  sudo mkfs.ext4 /dev/sdb1
-   81  lsblk -f
-   82  mkdir ~/disco_practica
-   83  sudo mount /dev/sdb1 ~/disco_practica
-   84  df -h | grep sdb1
+Práctica 1: Gestión de Paquetes y Repositorios
+Actualizar el sistema y enumerar repositorios: 
+Primero actualizamos la lista de paquetes y el sistema. Luego mostramos el archivo donde se guardan los repositorios (/etc/apt/sources.list).
+
+sudo apt update && sudo apt upgrade -y
+cat /etc/apt/sources.list
+
+Buscar la herramienta en el caché: Buscamos si bashtop ya está en los repositorios oficiales de Kali.
+
+apt search bashtop
+
+Instalar "Bashtop Resource Monitor": Kali Linux suele incluir bashtop en sus repositorios modernos. Intenta instalarlo directamente:
+
+sudo apt install bashtop -y
+
+por siacaso 
+sudo apt update
+sudo apt install bashtop
+
+Desinstalar eliminando configuración: Para desinstalar y borrar los archivos de configuración (esto es lo que hace --purge):
+
+sudo apt remove --purge bashtop -y
+
+Eliminar dependencias no utilizadas: Esto limpia las librerías que se instalaron con Bashtop y ya no sirven.
+
+sudo apt autoremove -y
+
+Práctica 2: Tareas Programadas (Cron y At)
+Cron job para actualizar a las 11:00 PM (23:00): Como actualizar requiere permisos de administrador, editaremos el crontab del usuario root.
+
+sudo crontab -e
+
+Añade la siguiente línea al final del archivo:
+
+0 23 * * * apt update && apt upgrade -y
+
+Cron job para reiniciar los domingos a las 3:00 AM: En el mismo archivo que abriste arriba (sudo crontab -e), añade esta línea:
+
+0 3 * * 0 /sbin/reboot
+(Guarda y cierra el editor. En nano es Ctrl+O, Enter, Ctrl+X).
+
+Tarea con "at" para limpiar /tmp en 1 minuto: Primero asegúrate de tener at instalado e iniciado:
+
+sudo apt install at -y
+sudo systemctl start atd
+
+Ahora, ejecutamos la prueba mostrando el antes y el después. Ejecuta estos comandos en orden:
+
+ Ver contenido actual
+ls /tmp
+
+ Programar la tarea
+echo "rm -rf /tmp/*" | sudo at now + 1 minute
+
+ Espera 60 segundos... y luego verifica
+ls /tmp
+
+Práctica 3: Gestión de Almacenamiento
+Configuración de VM (Acción fuera de la terminal):
+
+Apaga tu máquina virtual.
+
+Ve a la configuración de tu hipervisor (VirtualBox/VMware).
+
+En "Almacenamiento", agrega un Nuevo Disco Duro Virtual de 20GB.
+
+Enciende la máquina virtual.
+
+Identificar, Particionar y Formatear: Primero, identifica el nombre del disco nuevo (probablemente sea /dev/sdb, pero verifica el tamaño de 20GB):
+
+lsblk
+
+Ahora creamos la partición y formateamos (asumiendo que el disco es sdb):
+
+Crear tabla de particiones (sigue las instrucciones en pantalla: n, p, 1, enter, enter, w)
+sudo fdisk /dev/sdb
+
+Formatear la partición creada (sdb1) como ext4
+sudo mkfs.ext4 /dev/sdb1
+
+Montar en el Escritorio: Reemplaza tu_usuario por tu nombre de usuario real en Kali.
+
+Crear la carpeta
+mkdir ~/Desktop/mi_disco_20gb
+
+Montar el disco
+sudo mount /dev/sdb1 ~/Desktop/mi_disco_20gb
+
+Crear el archivo:
+
+ Entrar al directorio
+cd ~/Desktop/mi_disco_20gb
+
+ Crear el archivo (necesitas sudo porque el dueño del mount es root)
+sudo touch AdrianAlcantara.txt
+
+ Verificar que se creó
+ls
+ Desmontar y Montar en /mnt:
+
+ Salir del directorio primero (importante)
+cd ~
+
+ Desmontar
+sudo umount ~/Desktop/mi_disco_20gb
+
+ Montar en /mnt
+sudo mount /dev/sdb1 /mnt
+
+Comprobar la persistencia del archivo:
+
+
+ls /mnt
