@@ -1,239 +1,470 @@
-==========================================
-Laboratorio 1 - Instalacion de webmin
-==========================================
-wget -q -O- http://www.webmin.com/jcameron-key.asc | sudo gpg --dearmor | sudo tee /etc/apt/keyrings/webmin.gpg
-sudo sh -c 'echo "deb http://download.webmin.com/download/repository sarge contrib" > /etc/apt/sources.list.d/webmin.list'
+==== Practica 1 Instalacion de Webmin ====
+
+
+Actualizar los paquetes
+
+```
 sudo apt update
-sudo apt install webmin -y
-https://[Tu_Dirección_IP]:10000
+```
 
-================================================================
-Practica 2 Desplieque de una VM con terraform en digital Ocean
-================================================================
-mkdir -p Terraform
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/azure_vm_key
+Descargar webmin
+```
+wget http://prdownloads.sourceforge.net/webadmin/webmin_2.105_all.deb
+```
+
+Instalar dependencias necesarias
+
+```
+sudo apt install perl libnet-ssleay-perl libauthen-pam-perl libio-pty-perl apt-show-versions -y
+```
+
+Instalar Webmin
+```
+sudo dpkg -i webmin_2.105_all.deb
+```
+
+acceder a webmin
+```
+https://localhost:10000
+```
+
+
+1. Administración de usuario 
+-Crear cuenta de usuario
+Sistema > Users and Groups > Create a new user
+
+Verificar la creación del usuario en la lista de usuarios
+```
+```
+cut -d: -f1 /etc/passwd
+```
+
+verificar el usuario 
+```bash 
+getent passwd michelle
+```
+
+y borramos el usuario
+
+2. Gestion de servicios (ssh)
+System > bootup and shutdown
+
+verificamos el servicio a ver si esta activo
+```bash
+sudo systemctl status ssh
+```
+
+desactivamos 
+reiniciamos
+
+3. Configuracion de red (IP estatica)
+
+
+4. Administracion de software
+System > Software Packages
+
+Instalar un paquete (seccion From APT)
+```
+htop
+```
+
+Actualizamos 
+**esde Webmin (para todo):**
+
+- Ve a `System > Software Package Updates`
+    
+- Haz clic en **Update selected packages** o **Update all packages**
+    
+-
+
+desinstalar
+
+software package
+search for package
+
+
+
+
+y verificamos la terminal con 
+```
+dpkg -l | grep htop
+```
+
+
+
+dashboard
+
+==== Practica 2 Desplieque de una VM con terraform en digital Ocean ====
+
+
+
+Pasos Terminal 
+
+1. Instalar Terraform 
+actualizamos los paquetes
+```
+sudo apt update
+```
+
+Instalar las dependencias necesarias
+```
+sudo apt install -y gnupg software-properties-common curl
+```
+
+Agregar la clave GPG de hashiCorp
+
+```
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+```
+
+Agregar el repositorio de HashiCorp
+```
+sudo apt update && sudo apt install -y gnupg software-properties-common curl
+sudo apt-add-repository "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+```
+
+Instalar Terraform
+```
+sudo apt update
+sudo apt install terraform -y
+```
+
+Verificar la Instalacion 
+```
 terraform -v
-sudo apt install terraform
-az -version
-apt install azure-cli
-sudo nano main.cf
-echo ~/.ssh/azure_vm_key.pub
-terraform init 
-terraform plan
-terraform apply
-az network public-ip show --resource-group OS3ProyectRG --name OS3ProjectPublicIP --query ipAddress --output tsv
+```
 
-terraform --
 
+2. Generar la llave ssh 
+```
+ssh-keygen -t rsa -b 4096 -C "michelita-key"
+```
+
+Ver la llave publica
+```
+cat ~/.ssh/id_rsa.pub
+```
+
+
+Vamos a Digital Ocean 
+
+Crear Clave SSH(settings > security) ponemos lo que nos genero el keygen en la terminal 
+
+Fingerprint
+```
+96:77:1f:2e:6f:6d:32:f0:4f:5d:b7:82:9c:3b:d9:5a
+```
+
+Crear Api 
+```
+dop_v1_16527850af1fafcf909422263af1e1929674c36bc62cb798a8f49f0b50b54387
+```
+
+
+Volvemos a la terminal 
+
+creamos el archivo main.tf
+```
+sudo nano main.tf
+```
+
+```
 terraform {
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.110.0"   # 
-    }
-  }
-
-  required_version = ">= 1.1.0"
-}
-
-provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
+    digitalocean = {
+      source = "digitalocean/digitalocean"
     }
   }
 }
 
-# Grupo de recursos
-resource "azurerm_resource_group" "rg" {
-  name     = "OS3ProyectRG"
-  location = "canadacentral"
+provider "digitalocean" {
+  token = "d"
 }
 
-# Red virtual
-resource "azurerm_virtual_network" "vnet" {
-  name                = "OS3ProyectVnet"
-  address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+resource "digitalocean_droplet" "os3vm" {
+  name   = "OS3vm"
+  image  = "ubuntu-22-04-x64"
+  region = "nyc1"
+  size   = "s-1vcpu-1gb"
+
+  # Usar la llave SSH pública proporcionada para acceso
+  ssh_keys = [""]
+
+  tags = ["OS3vm"]
 }
 
-# Subnet 
-resource "azurerm_subnet" "subnet" {
-  name                 = "OS3ProyectSubnet"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
-
-  depends_on = [azurerm_virtual_network.vnet]
+output "ip_address" {
+  value = digitalocean_droplet.os3vm.ipv4_address
 }
 
-# Network Security Group
-resource "azurerm_network_security_group" "nsg" {
-  name                = "OS3ProyectNSG"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+```
 
-  security_rule {
-    name                       = "SSH"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-}
+Inicializar Terraform
+```
+terraform init
+```
 
-# Asociar NSG a la Subnet
-resource "azurerm_subnet_network_security_group_association" "subnet_assoc" {
-  subnet_id                 = azurerm_subnet.subnet.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
+Planificar el despliegue para que todo este bien configurado
+```
+terraform plan
+```
 
-# IP pública (Standard + Static)
-resource "azurerm_public_ip" "pip" {
-  name                = "OS3ProjectPublicIP"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
+Aplicar el despliegue
+```
+terraform apply
+```
 
-# NIC con IP pública
-resource "azurerm_network_interface" "nic" {
-  name                = "OS3ProjectNIC"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+para acceder a la vm 
 
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.pip.id
-  }
-}
+```
+ssh root@ipdelamaquina
+```
 
-# Máquina virtual Linux
-resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "OS3ProyectVM"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  size                = "Standard_B2as_v2"
-  admin_username      = "wilmer_so3"
 
-  network_interface_ids = [
-    azurerm_network_interface.nic.id,
-  ]
+==== Practica 3 Instalación de Ansible ====
 
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
 
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts-gen2"
-    version   = "latest"
-  }
+Vm-server
 
-  admin_ssh_key {
-    username   = "wilmer_so3"
-    public_key = file("/home/wilmer_so3_20241137/.ssh/azure_vm_key.pub")
-  }
-}
+Instalamos Ansible
+```
+sudo apt update && sudo apt install ansible -y
+```
 
-ssh -i /home/wilmer_so3_20241137/.ssh/azure_vm_key wilmer_so3@4.206.130.3
-=====================================
-Practica 3: Instalación de Ansible
-=====================================
-sudo apt update # Actualizar paquetes
-sudo apt install pytho3 python3-pip -y #Instalar dependencias con lo que vamos a trabajar
-sudo apt install python3-venv -y #Instalar esta dpeendencia
-python3 -m venv ~/ansible_venv #Montar un entorno virtual
-source ~/ansible_venv/bin/activate #Activar el entorno virtual 
-pip install pywinrm #Instalar lo necesario para trabajar
-pip install ansible #Instalar ansible 
-ansible --version
-clear
-ssh-copy-id ansible@4.150.201.24
-ssh ansible@4.150.201.24
-sudo nano /etc/ansible/hosts
-[linux]
-azure_host ansible_host=4.150.201.24 ansible_user=ansible
-sudo nano /etc/ansible/hosts
+creamos la carpeta y accedemos
+```
+sudo mkdir -p /etc/ansible
+cd /etc/ansible
+```
 
-[linux]
-azure_host ansible_host=4.150.201.24 ansible_user=ansible
+creamos un archivo para definir la configuracion de ansible
+```
+[defaults]
+inventory = /etc/ansible/hosts 
+private_key_file = /home/ansible/.ssh/id_rsa hosts_key_checking = False 
+ask_become_pass = True
 
-[win]
-windows ansible_host=10.0.0.172
+[ssh_connection]
+ssh_args = -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s
+```
 
-[win:vars]
-ansible_connection=winrm
-ansible_user=ansible
-ansible_password=Ansible123!
-ansible_winrm_transport=basic
-ansible_winrm_scheme=http
-ansible_winrm_port=5985
-ansible_winrm_server_cert_validation=ignore
+creamos el archivo hosts
 
-ansible linux -m ping
-ansible w
----------------------------------------------------------------------------------------------------
-Windows
-net user ansible "Ansible123!" /add
-net localgroup Administrators ansible /add
-winrm quickconfig -force
-winrm set winrm/config/service/auth '@{Basic="true"}'
-winrm set winrm/config/client '@{AllowUnencrypted="true"}'
-winrm create winrm/config/Listener?Address=*+Transport=HTTP '@{Port="5985"}'Set-NetFirewallRule -Name "WINRM-HTTP-In-TCP" -Enabled True -Profile Any
+```
+[win] 
+192.168.100.45
+
+[win:vars] 
+ansible_user=ansible 
+ansible_password=1234
+ansible_port=5985 
+ansible_connection=winrm 
+ansible_winrm_transport=basic ansible_winrm_server_cert_validation=ignore 
+
+[linux] 
+
+
+[linux:vars] ansible_user=ansible 
+ansible_ssh_private_key_file=~/.ssh/id_rsa 
+ansible_become_password=1234
+```
+
+generamos la llave
+```
+ssh-keygen -t rsa -b 4096
+```
+
+vamos a acceder a la carpeta de ssh
+```
+cd ~/.ssh
+ls
+```
+
+verifcamos la llave
+```
+cat id_rsa.pub
+```
+
+Accedemos a la VM-Digital Ocean
+
+Vamos a crear el usuario
+```
+adduser ansible
+```
+
+lo agregamos al siguiente grupo
+```
+usermod -aG sudo ansible
+```
+
+```
+chsh -s /bin/bash ansible
+```
+
+
+Accedemos al usuario
+```
+su ansible
+```
+
+creamos una carpeta para agregar la llave publica del server
+```
+mkdir ~/.ssh
+nano ~/.ssh/authorized_keys
+```
+
+Asignamos los permisos a la carpeta
+```
+chmod 600 ~/.ssh/authorized_keys
+```
+
+probamos el ping en la vm linux
+```
+ansible linux -m ping -u ansible
+```
+
+En la maquina windows
+
+```
+desactivamos el firewall
+```
+
+Ingresamos a powershell en modo administrador
+
+
+```
+Set-ExecutionPolicy RemoteSigned -Force
 Enable-PSRemoting -Force
+Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
+Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value "*" -Force
+netsh advfirewall firewall add rule name="WinRM HTTP" dir=in action=allow protocol=TCP localport=5985
+netsh advfirewall firewall set rule group="Administración remota de Windows" new enable=yes
+Restart-Service WinRM
+$Password = ConvertTo-SecureString "1234" -AsPlainText -Force
+New-LocalUser -Name "ansible" -Password $Password -FullName "Ansible User" -Description "Usuario para Ansible"
+Add-LocalGroupMember -Group "Administradores" -Member "ansible"
+winrm enumerate winrm/config/listener
+Test-NetConnection -ComputerName localhost -Port 5985
+```
 
-ansible win -m win_copy -a "src=C:/Users/ansible/Desktop/archivo.txt dest=C:/Users/ansible/Documents/archivo.txt remote_src=yes"
-ansible linux -m reboot -b --ask-become-pass
-=============================
-Practica 4: Comandos Ad-Hoc
-=============================
-source ~/ansible_venv/bin/activate
-  ansible linux -m reboot -ask--become-pass
-  ansible win -m win_copy -a "src=C:\\Users\\ansible\\Desktop\\archivo_a_mover.txt dest=C:\\Users\\ansible\\Documents\\archivo_a_mover.txt remote_src=yes"
-===========================
-Practica 5: Playbooks
-===========================
-sudo nano instalar_apps.yml
-- name: 1. Instalar NGINX en Servidor Linux (Azure)
-  hosts: linux
-  become: yes # Usa 'sudo' para permisos de instalación
-  tasks:
-    - name: Actualizar la caché de paquetes de APT
-      ansible.builtin.apt:
-        update_cache: yes
-      
-    - name: Instalar el paquete NGINX
-      ansible.builtin.apt:
-        name: nginx
-        state: present
-        
-    - name: Asegurar que el servicio NGINX esté corriendo
-      ansible.builtin.service:
-        name: nginx
-        state: started
-        enabled: yes
+probamos el ping 
+```
+ansible win -m win_ping
+```
 
-- name: 2. Instalar Notepad++ en Máquina Windows
+
+
+==== Practica 4 Comandos Ad-Hoc ====
+
+
+1. Copiar  el archivo txt del escritorio a documentos en la maquina windows
+
+```
+ansible win -i /etc/ansible/hosts -m win_shell -a "Move-Item -Path 'C:/Users/michelita/Desktop/michele.txt' -Destination 'C:/Users/michelita/Documents/'"
+```
+
+Reiniciar la maquia digital ocean
+
+```
+ansible linux -i /etc/ansible/hosts -m reboot --become
+```
+
+==== Practica 5 Playbooks ====
+
+
+Vamos a nuestra maquina windows y verificamos que no esta notepad
+
+En Linux
+
+```
+sudo nano install_notepad.yml
+```
+
+pegamos 
+
+```
+- name: Descargar e instalar Notepad++ en Windows
   hosts: win
   tasks:
-    - name: Instalar Notepad++ con el módulo win_package
-      # URL directa de descarga del instalador de Notepad++ (versión de 64 bits)
-      ansible.windows.win_package:
-        name: Notepad++
-        product_id: Notepad++
-        path: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.6.1/npp.8.6.1.Installer.x64.exe
-        arguments: /S # La opción /S asegura una instalación silenciosa (sin interacción)
+    - name: Descargar instalador de Notepad++
+      win_get_url:
+        url: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.5.3/npp.8.5.3.Installer.x64.exe
+        dest: C:\Users\michelita\Downloads\npp_installer.exe
+
+    - name: Ejecutar el instalador de Notepad++
+      win_package:
+        path: C:\Users\michelita\Downloads\npp_installer.exe
+        arguments: /S
         state: present
 
-        ansible-playbook instalar_apps.yml
+    - name: Verificar si Notepad++ está instalado
+      win_stat:
+        path: C:\Program Files\Notepad++\notepad++.exe
+      register: resultado_npp
+
+    - name: Confirmar instalación exitosa
+      debug:
+        msg: "Notepad++ está instalado correctamente."
+      when: resultado_npp.stat.exists
+```
+
+ejecutarlo 
+```
+ansible-playbook install_notepad.yml
+```
+
+Accedemos a notepad
+
+el siguiente playbook
+
+```
+sudo nano actualizar_repositorios.yml
+```
+
+```
+- name: Actualizar los repositorios del sistema
+  hosts: linux
+  become: yes
+  tasks:
+    - name: Actualizar la lista de paquetes
+      apt:
+        update_cache: yes
+      register: resultado
+
+    - name: Mostrar resultado de la actualización
+      debug:
+        var: resultado
+```
+
+- name: Crear usuario y configurar en Windows
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Crear nuevo usuario
+      ansible.windows.win_user:
+        name: nuevo_usuario
+        password: "ContraseñaSegura123!"
+        state: present
+        groups:
+          - Administradores
+        update_password: on_create
+        password_never_expires: yes
+        user_cannot_change_password: no
+
+    - name: Descargar instalador de Notepad++
+      ansible.windows.win_get_url:
+        url: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/latest/download/npp.8.6.3.Installer.x64.exe
+        dest: C:\Temp\npp_installer.exe
+
+    - name: Instalar Notepad++
+      ansible.windows.win_package:
+        path: C:\Temp\npp_installer.exe
+        arguments: /S
+        state: present
+
+para hacerlo 
+```
+ansible-playbook actualizar_repositorios.yml
+```
+
