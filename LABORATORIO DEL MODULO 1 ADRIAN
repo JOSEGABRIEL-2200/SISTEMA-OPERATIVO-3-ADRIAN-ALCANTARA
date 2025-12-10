@@ -1,53 +1,185 @@
-Practica 2: Configuración de parametros de red.
-─$ history
-    1  ip a
-    2  sudo ip addr add 192.168.1.50/24 dev eth0
-    3  sudo ip route add default via 192.168.1.1
-    4  ip a
-    5  sudo nano /etc/resolv.conf
-    6  ip a
+Comandos usados practica 1
+Practica 1: Instalación del Sistema Operativo (NombreDeSuDistro)
 
-Practica 3: Gestion de Usuario y grupos
- sudo adduser jose 
-    8  sudo adduser JOSE 
-    9  sudo usermod -aG sudo jose 
-   10  sudo usermod -aG sudo JOSE 
-   11  id JOSE 
-   12  sudo groupadd guest 
-   13  sudo groupadd guestt 
-   14  sudo adduser -aG gusestt invitado  
-   15  sudo adduser invitado 
-   16  sudo adduser -aG gusestt invitado  
-   17  sudo usermod -aG gusestt invitado  
-   18  sudo usermod -aG gusett invitado  
-   19  sudo usermod -aG guestt invitado 
-   20  geten group guestt
-   21  getent group guestt
-   22  sudo deluser invitado 
-   23  sudo groupdel  guestt 
-   24  cat /etc/passwd | grep invitado 
-   25  getent group guestt
+-Cree una máquina virtual con recursos suficientes para ejecutar con éxito su sistema operativo (consultar requisitos mínimo de su distro)
+-Configure la Tarjeta de Red de su VM en modo Bridge
+-Ejecute la Instalación del sistema Operativo en su VM
 
-Práctica 4: Gestión de Permisos de Archivos
-mkdir materia 
-   33  cd materia 
-   34  nano estudiante.txt
-   35  ls -l
-   36  chmod 700 estudiante.txt 
-   37  ls -l estudiante.txt
-   38  chmod 070  estudiante.txt 
-   39  ls -l estudiante.txt
-   40  mkdir ../materia 2
-   41  mkdir ../materia2
-   42  cp estudiante.txt ../materia2/
-   43  ls -l ../materia2
-   44  ls -l ../materia
-   45  ls -l ../materia2
-   46  cd .. 
-   47  rm -r materia 
-   48  ls
-   49  rm -r materia24
-   50  rm -r materia2
-   51  ls
+No hay comandos, es la instalación.
 
+============================================
 
+Comandos usados practica 2
+Practica 2: Configuración de parámetros de red.
+
+-Configure los parámetros de red utilizando DHCP e IP estática a través de la terminal (explique TODAS las formas que su sistema operativo permite configurarlo)
+-Configure los DNS de Google 8.8.8.8 - 8.8.4.4 en su sistema
+
+ifconfig - Información de interfaces de red
+Otro comando con el que podemos verificar esto es:
+
+ip a
+
+Eliminar la IP:
+sudo ifconfig eth0 0.0.0.0
+
+Para agregarla:
+sudo ifconfig eth0 10.0.0.133 netmask 255.255.255.0
+
+Borrar la dirección de otra forma:
+sudo ip a del 10.0.0.133/24 dev eth0
+
+Agregarla de manera persistente:
+sudo nano /etc/network/interfaces
+# Cambiar de "lo" a "eth0" y en vez de "loopback" es "static"
+address 10.0.0.133
+netmask 255.255.255.0
+gateway 192.168.236.1
+# Guardar con Ctrl + X
+
+Reiniciar la red:
+sudo systemctl restart networking
+
+Confirmar con:
+ifconfig
+
+Otra opción es:
+sudo ifconfig eth0 down
+sudo ifconfig eth0 up
+
+Para confirmar los DNS:
+sudo nano /etc/resolv.conf
+nameserver 10.0.0.1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+# Guardar con Ctrl + X
+
+Otra forma sería entrar a "Advanced Network Configuration":
+- Wired Connection -> IPv4
+- Add la IP 10.0.0.133, máscara y gateway
+- DNS: 8.8.8.8
+
+Otra opción sería:
+sudo nmtui
+# Editar conexión y establecer el gateway y los dos DNS de Google
+
+Configurar DHCP automático:
+# Entrar a "Advanced IPv4" y poner DHCP automático
+
+Confirmar todo con:
+ifconfig
+
+============================================
+
+Comandos usados practica 3
+Practica 3: Gestión de Usuario y grupos
+
+-Cree un usuario con su nombre y agréguelo al grupo "sudoers" para que tenga permisos de administración
+-Cree un grupo llamado guest, cree un usuario y agréguelo al grupo creado anteriormente
+-Elimine el usuario y el grupo previamente creado
+
+sudo useradd -m gabriel
+ls
+
+sudo passwd altagracia
+# Ingrese la contraseña 12345
+
+Agregarlo al grupo sudoers:
+sudo usermod -aG sudo gabriel
+ls para verificar que se creó correctamente
+
+Verificar que todo funciona correctamente:
+su gabriel
+whoami
+sudo su
+ls
+
+Volver al usuario original:
+exit
+su gabriel20250742
+1234
+
+Crear un grupo llamado guest y un usuario:
+sudo adduser jose 
+# Ingrese la contraseña 123
+ls para ver si se creó
+
+Crear grupo guest:
+sudo addgroup guest
+
+Agregar el usuario al grupo:
+sudo usermod -aG guest gabriel
+
+Ver grupos del usuario:
+groups jose
+
+Eliminar el usuario y el grupo:
+sudo rm -r jose
+sudo rm -r gabriel
+ls para ver si se eliminó
+
+Eliminar el grupo:
+sudo groupdel guest
+
+Verificar residuos:
+cat /etc/passwd
+# Para borrar residuos, edite el archivo:
+sudo nano /etc/passwd
+
+Eliminar líneas correspondientes al usuario:
+# Confirmar con:
+cat /etc/passwd
+
+Eliminar residuos de los grupos:
+cat /etc/group
+# Para borrarlos:
+sudo nano /etc/group
+# Eliminar líneas correspondientes al grupo
+# Confirmar con:
+cat /etc/group
+
+============================================
+
+Comandos usados practica 4
+Practica 4: Gestión de Permisos de archivos
+
+-Cree una carpeta llamada materia, dentro cree un archivo llamado estudiante.txt y edítelo utilizando "vi", agregue su nombre y matrícula
+-Modifique los permisos para que solo el usuario propietario del archivo pueda tener control total
+-Modifique los permisos para que solo el grupo propietario del archivo pueda tener control total
+-Cree una nueva carpeta llamada materia2 y cree una copia del archivo estudiante.txt dentro de ella
+-Elimine la carpeta materia junto con el archivo estudiante.txt
+
+mkdir materia
+cd materia
+touch estudiantes.txt
+vi estudiantes.txt
+# Agregar matrícula y nombre
+# Guardar con :wq
+
+Verificar que se guardó:
+cat estudiantes.txt
+
+Modificar los permisos para que solo el propietario tenga control total:
+chmod 700 estudiantes.txt
+
+Confirmar permisos:
+ls -l estudiantes.txt
+
+Modificar permisos para que solo el grupo propietario tenga control total:
+sudo addgroup estu
+sudo chown :estu estudiantes.txt
+chmod 770 estudiantes.txt
+
+Crear una carpeta llamada materia2 y copiar el archivo:
+mkdir materia2
+cp materia/estudiantes.txt materia2/
+
+Confirmar que se copió correctamente:
+cd materia2
+ls
+
+Volver atrás y eliminar las carpetas:
+cd ..
+rm -r materia
+rm -r materia2
+```
