@@ -140,3 +140,165 @@ entrar a wordpress
 
 verificar en el portainer el contenedor
 http://localhost:9443
+
+
+
+
+
+# PRACTICA: ALTA DISPONIBILIDAD CON KEEPALIVED + DOCKER
+
+## OBJETIVO
+Configurar dos servidores Linux que ejecutan Docker y Keepalived para ofrecer un servicio web altamente disponible mediante una IP virtual (VIP) que cambia automáticamente entre nodos si uno falla.
+
+## REQUISITOS
+- Dos servidores Linux (server1 y server2)
+- Docker instalado en ambos nodos
+- Keepalived instalado en ambos nodos
+- Misma red para ambos nodos
+- Una IP flotante / virtual (VIP) que será asignada al nodo activo
+
+-------------------------------------
+
+# PARTE 1: INSTALAR DOCKER EN AMBOS NODOS
+
+## Paso 1: Actualizar repositorios
+apt update
+apt upgrade -y
+
+## Paso 2: Instalar Docker
+apt install docker.io -y
+
+## Paso 3: Iniciar y habilitar Docker
+systemctl start docker
+systemctl enable docker
+
+-------------------------------------
+
+# PARTE 2: DESPLEGAR UN SERVICIO WEB CON DOCKER
+
+## Paso 1: Crear contenedor web (server1)
+docker run -d --name webserver -p 80:80 nginx
+
+## Paso 2: Crear contenedor web (server2)
+docker run -d --name webserver -p 80:80 nginx
+
+-------------------------------------
+
+# PARTE 3: INSTALAR KEEPALIVED
+
+## Paso 1: Instalar Keepalived en ambos servidores
+apt install keepalived -y
+
+-------------------------------------
+
+# PARTE 4: CONFIGURACIÓN DE KEEPALIVED
+
+## Configuración en server1 (MASTER)
+
+cat <<EOF > /etc/keepalived/keepalived.conf
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id 51
+    priority 150
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 12345
+    }
+    virtual_ipaddress {
+        192.168.1.200
+    }
+}
+EOF
+
+systemctl restart keepalived
+
+## Configuración en server2 (BACKUP)
+
+cat <<EOF > /etc/keepalived/keepalived.conf
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth0
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 12345
+    }
+    virtual_ipaddress {
+        192.168.1.200
+    }
+}
+EOF
+
+systemctl restart keepalived
+
+-------------------------------------
+
+# PARTE 5: VALIDAR ALTA DISPONIBILIDAD
+
+## Paso 1: Revisar si el MASTER tomó la IP virtual
+ip addr show
+
+Debe verse 192.168.1.200 asignada al MASTER.
+
+## Paso 2: Acceder al servicio web por VIP
+curl http://192.168.1.200
+
+## Paso 3: Simular caída del nodo MASTER
+systemctl stop keepalived
+
+## Paso 4: Verificar que el BACKUP tomó la IP
+ip addr show
+
+## Paso 5: Acceder otra vez al servicio web por VIP
+curl http://192.168.1.200
+
+El servicio debe seguir respondiendo.
+
+-------------------------------------
+
+# NOTAS, ERRORES Y SOLUCIONES
+
+- Error: La IP virtual no aparece  
+  Causa: Nombre de interfaz incorrecto  
+  Solución: Ejecutar ip a y reemplazar eth0 por la interfaz correcta  
+
+- Error: Ambos nodos toman la IP  
+  Causa: Mismo valor de priority  
+  Solución: Prioridad mayor para MASTER  
+
+- Error: El servicio no responde por la VIP  
+  Causa: El contenedor Docker no está en ejecución  
+  Solución: docker ps  
+            systemctl restart keepalived  
+
+- Error: FAILOVER no funciona  
+  Causa: keepalived no reinició correctamente  
+  Solución: systemctl status keepalived  
+            Verificar archivo keepalived.conf  
+
+- Error: nginx no inicia  
+  Causa: Puerto 80 en uso  
+  Solución: lsof -i:80  
+            Matar proceso o cambiar puerto  
+
+-------------------------------------
+
+# TÉRMINOS IMPORTANTES
+
+- **VRRP**: Protocolo que permite que múltiples servidores compartan una misma IP virtual.
+- **VIP**: IP virtual flotante que migra entre nodos al producirse fallos.
+- **Keepalived**: Servicio que gestiona VRRP y salud del sistema para alta disponibilidad.
+- **Docker**: Plataforma para ejecutar aplicaciones aisladas en contenedores.
+- **MASTER**: Nodo principal que posee la IP virtual.
+- **BACKUP**: Nodo en espera que toma la IP si el MASTER falla.
+- **Failover**: Proceso de transferir servicios de un nodo fallado a otro operativo.
+
+
+
+
+
+
