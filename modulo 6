@@ -92,3 +92,123 @@ sudo systemctl restart ssh
 sudo systemctl status ssh
 
 ssh usuario@ip_maquina
+
+
+PRACTICA 3 – INSTALACIÓN Y CONFIGURACIÓN DE IDS SURICATA (1 Punto)
+
+# OBJETIVO
+Instalar Suricata como IDS, crear reglas de detección personalizadas para diferentes tipos de tráfico, ejecutar el IDS, realizar pruebas desde la máquina host y validar que Suricata detecte correctamente cada evento.
+
+-------------------------------------
+
+# PARTE 1: INSTALAR SURICATA EN KALI/UBUNTU
+
+apt update
+apt install suricata -y
+
+suricata --build-info
+
+systemctl enable suricata
+systemctl start suricata
+
+-------------------------------------
+
+# PARTE 2: CONFIGURAR ARCHIVO DE REGLAS PERSONALIZADAS
+
+mkdir -p /etc/suricata/rules
+touch /etc/suricata/rules/local.rules
+
+nano /etc/suricata/suricata.yaml
+
+# Dentro del archivo, buscar:  default-rule-path:
+# Y asegurarse de que incluya:
+
+default-rule-path: /etc/suricata/rules
+rule-files:
+  - local.rules
+
+-------------------------------------
+
+# PARTE 3: CREAR LAS REGLAS DE DETECCIÓN SOLICITADAS
+
+nano /etc/suricata/rules/local.rules
+
+# AGREGAR LAS SIGUIENTES REGLAS:
+
+alert icmp any any -> $HOME_NET any (msg:"ICMP detectado"; sid:100001; rev:1;)
+alert tcp any any -> $HOME_NET 21 (msg:"Acceso detectado a puerto 21/tcp"; sid:100002; rev:1;)
+alert tcp any any -> $HOME_NET 22 (msg:"Acceso detectado a puerto 22/tcp"; sid:100003; rev:1;)
+alert tcp any any -> $HOME_NET 80 (msg:"Acceso detectado a puerto 80/tcp"; sid:100004; rev:1;)
+
+-------------------------------------
+
+# PARTE 4: EJECUTAR SURICATA EN MODO IDS
+
+systemctl stop suricata
+
+suricata -c /etc/suricata/suricata.yaml -i eth0
+
+-------------------------------------
+
+# PARTE 5: REALIZAR LAS PRUEBAS DESDE LA MÁQUINA HOST
+
+# Ping hacia la VM
+ping -c 3 <IP_DE_LA_VM>
+
+# Escaneo a puerto 21
+nc -vz <IP_DE_LA_VM> 21
+
+# Escaneo a puerto 22
+nc -vz <IP_DE_LA_VM> 22
+
+# Acceso vía HTTP
+curl http://<IP_DE_LA_VM>
+
+-------------------------------------
+
+# PARTE 6: VERIFICAR LAS ALERTAS GENERADAS POR SURICATA
+
+tail -f /var/log/suricata/fast.log
+
+# Allí aparecerán las detecciones, por ejemplo:
+# ICMP detectado
+# Acceso detectado a puerto 21/tcp
+# Acceso detectado a puerto 22/tcp
+# Acceso detectado a puerto 80/tcp
+
+-------------------------------------
+
+# NOTAS, ERRORES Y SOLUCIONES
+
+- Error: Suricata no detecta nada  
+  Causa: No ejecutaste modo IDS con interfaz correcta  
+  Solución: ejecutar suricata -i eth0  
+
+- Error: Archivo local.rules no carga  
+  Causa: No fue agregado a rule-files en suricata.yaml  
+  Solución: revisar ruta en default-rule-path  
+
+- Error: No se ven logs  
+  Causa: Suricata iniciado desde systemctl (modo IPS)  
+  Solución: usar el fast.log al ejecutar manualmente  
+
+- Error: "permission denied" en logs  
+  Causa: No eres root  
+  Solución: ejecutar comando con sudo  
+
+- Error: La interfaz no existe  
+  Causa: Nombre incorrecto  
+  Solución: ejecutar ip a para ver interfaces  
+
+-------------------------------------
+
+# TÉRMINOS IMPORTANTES
+
+- **Suricata**: Sistema IDS/IPS capaz de analizar tráfico en tiempo real.
+- **IDS**: Sistema de Detección de Intrusos. No bloquea, solo alerta.
+- **Reglas**: Instrucciones que indican qué tráfico debe generar alertas.
+- **HOME_NET**: Red protegida definida en Suricata.
+- **Fast.log**: Archivo donde se registran las alertas generadas.
+- **ICMP**: Protocolo usado para ping.
+- **Puertos TCP**: Identifican servicios específicos (21 FTP, 22 SSH, 80 HTTP).
+- **Alert**: Acción de Suricata que registra un evento detectado.
