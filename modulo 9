@@ -1,0 +1,239 @@
+==========================================
+Laboratorio 1 - Instalacion de webmin
+==========================================
+wget -q -O- http://www.webmin.com/jcameron-key.asc | sudo gpg --dearmor | sudo tee /etc/apt/keyrings/webmin.gpg
+sudo sh -c 'echo "deb http://download.webmin.com/download/repository sarge contrib" > /etc/apt/sources.list.d/webmin.list'
+sudo apt update
+sudo apt install webmin -y
+https://[Tu_Dirección_IP]:10000
+
+================================================================
+Practica 2 Desplieque de una VM con terraform en digital Ocean
+================================================================
+mkdir -p Terraform
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/azure_vm_key
+terraform -v
+sudo apt install terraform
+az -version
+apt install azure-cli
+sudo nano main.cf
+echo ~/.ssh/azure_vm_key.pub
+terraform init 
+terraform plan
+terraform apply
+az network public-ip show --resource-group OS3ProyectRG --name OS3ProjectPublicIP --query ipAddress --output tsv
+
+terraform --
+
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.110.0"   # 
+    }
+  }
+
+  required_version = ">= 1.1.0"
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+}
+
+# Grupo de recursos
+resource "azurerm_resource_group" "rg" {
+  name     = "OS3ProyectRG"
+  location = "canadacentral"
+}
+
+# Red virtual
+resource "azurerm_virtual_network" "vnet" {
+  name                = "OS3ProyectVnet"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+# Subnet 
+resource "azurerm_subnet" "subnet" {
+  name                 = "OS3ProyectSubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+
+  depends_on = [azurerm_virtual_network.vnet]
+}
+
+# Network Security Group
+resource "azurerm_network_security_group" "nsg" {
+  name                = "OS3ProyectNSG"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  security_rule {
+    name                       = "SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+# Asociar NSG a la Subnet
+resource "azurerm_subnet_network_security_group_association" "subnet_assoc" {
+  subnet_id                 = azurerm_subnet.subnet.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+# IP pública (Standard + Static)
+resource "azurerm_public_ip" "pip" {
+  name                = "OS3ProjectPublicIP"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+# NIC con IP pública
+resource "azurerm_network_interface" "nic" {
+  name                = "OS3ProjectNIC"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.pip.id
+  }
+}
+
+# Máquina virtual Linux
+resource "azurerm_linux_virtual_machine" "vm" {
+  name                = "OS3ProyectVM"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  size                = "Standard_B2as_v2"
+  admin_username      = "wilmer_so3"
+
+  network_interface_ids = [
+    azurerm_network_interface.nic.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+
+  admin_ssh_key {
+    username   = "wilmer_so3"
+    public_key = file("/home/wilmer_so3_20241137/.ssh/azure_vm_key.pub")
+  }
+}
+
+ssh -i /home/wilmer_so3_20241137/.ssh/azure_vm_key wilmer_so3@4.206.130.3
+=====================================
+Practica 3: Instalación de Ansible
+=====================================
+sudo apt update # Actualizar paquetes
+sudo apt install pytho3 python3-pip -y #Instalar dependencias con lo que vamos a trabajar
+sudo apt install python3-venv -y #Instalar esta dpeendencia
+python3 -m venv ~/ansible_venv #Montar un entorno virtual
+source ~/ansible_venv/bin/activate #Activar el entorno virtual 
+pip install pywinrm #Instalar lo necesario para trabajar
+pip install ansible #Instalar ansible 
+ansible --version
+clear
+ssh-copy-id ansible@4.150.201.24
+ssh ansible@4.150.201.24
+sudo nano /etc/ansible/hosts
+[linux]
+azure_host ansible_host=4.150.201.24 ansible_user=ansible
+sudo nano /etc/ansible/hosts
+
+[linux]
+azure_host ansible_host=4.150.201.24 ansible_user=ansible
+
+[win]
+windows ansible_host=10.0.0.172
+
+[win:vars]
+ansible_connection=winrm
+ansible_user=ansible
+ansible_password=Ansible123!
+ansible_winrm_transport=basic
+ansible_winrm_scheme=http
+ansible_winrm_port=5985
+ansible_winrm_server_cert_validation=ignore
+
+ansible linux -m ping
+ansible w
+---------------------------------------------------------------------------------------------------
+Windows
+net user ansible "Ansible123!" /add
+net localgroup Administrators ansible /add
+winrm quickconfig -force
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/client '@{AllowUnencrypted="true"}'
+winrm create winrm/config/Listener?Address=*+Transport=HTTP '@{Port="5985"}'Set-NetFirewallRule -Name "WINRM-HTTP-In-TCP" -Enabled True -Profile Any
+Enable-PSRemoting -Force
+
+ansible win -m win_copy -a "src=C:/Users/ansible/Desktop/archivo.txt dest=C:/Users/ansible/Documents/archivo.txt remote_src=yes"
+ansible linux -m reboot -b --ask-become-pass
+=============================
+Practica 4: Comandos Ad-Hoc
+=============================
+source ~/ansible_venv/bin/activate
+  ansible linux -m reboot -ask--become-pass
+  ansible win -m win_copy -a "src=C:\\Users\\ansible\\Desktop\\archivo_a_mover.txt dest=C:\\Users\\ansible\\Documents\\archivo_a_mover.txt remote_src=yes"
+===========================
+Practica 5: Playbooks
+===========================
+sudo nano instalar_apps.yml
+- name: 1. Instalar NGINX en Servidor Linux (Azure)
+  hosts: linux
+  become: yes # Usa 'sudo' para permisos de instalación
+  tasks:
+    - name: Actualizar la caché de paquetes de APT
+      ansible.builtin.apt:
+        update_cache: yes
+      
+    - name: Instalar el paquete NGINX
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        
+    - name: Asegurar que el servicio NGINX esté corriendo
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+- name: 2. Instalar Notepad++ en Máquina Windows
+  hosts: win
+  tasks:
+    - name: Instalar Notepad++ con el módulo win_package
+      # URL directa de descarga del instalador de Notepad++ (versión de 64 bits)
+      ansible.windows.win_package:
+        name: Notepad++
+        product_id: Notepad++
+        path: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.6.1/npp.8.6.1.Installer.x64.exe
+        arguments: /S # La opción /S asegura una instalación silenciosa (sin interacción)
+        state: present
+
+        ansible-playbook instalar_apps.yml
