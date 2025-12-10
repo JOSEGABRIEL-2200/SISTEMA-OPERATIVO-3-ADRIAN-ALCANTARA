@@ -1,143 +1,113 @@
-practica 1: grub
-  219  sudo nano /etc/default/grub 
-  220  sudo update-grub  
-  221  sudo reboot
-En la linea que comiensa con linux /boot/vmlinuz...: rw init=/bin/bash 
+﻿laboratorio 3
 
-en el archivo de configuracion 
+práctica 1
+punto 1
+
+sudo nano etc/default/grub
+Cambiar (o agregar si no está) la línea:
+GRUB_TIMEOUT=20
+
+
+sudo update grub
+sudo reboot
+
+
+punto 2
+le damos a la letra e
+en linux al final ponemos init=/bin/bash
+para remontar el sistema de archivo raíz 
 mount -o remount,rw /
-passwd root 
-sync 
-reboot -f 
+nano etc/shadow
 
-practica 2 : scrit 
-  227  mkdir documentostrabajo 
-  228  cd documentostrabajo 
-  229  echo "archivo de prueba 1 " > archivo1.txt
-  230  echo "archivo de prueba 2 " > archivo2.txt
-  231  ls 
-  232  cd home/gabriel 
-  233  cd /home/gabriel 
-  234  mkdir backups  
-  235  ls 
-  236  nano backup_home.sh
-  237  chmod +x backup_home.sh
-  238  ./backup_home.sh
-  239  nano backup_home.sh
-  240  ./backup_home.sh
-  241  ls /home/gabriel/backups 
-  242  ./backup_home.sh
-  243  nano backup_home.sh
-  244  ./backup_home.sh
-  245  ls /home/gabriel/backups 
-  246  /home 
-  247  ls /home/gabriel/backups 
-  248  cd ..
-  249  nano backup_home.sh
-  250  cd ..
-  251  exit
-  252  ls 
-  253  nano backup_home.sh
-  254  mkdir pedrito 
-  255  clear 
-  256  ls 
-  257  nano backup_home.sh
-  258  chmod +x backup_home.sh
-  259  ls -lh ~/backups
-  260  ./backup_home.sh
-  261  ls -lh ~/backups
-  262  chmod +x backup_home.sh
-  263  ./backup_home.sh
-  264  ls -lh ~/backups
-  265  touch pedrito.txt
-  266  ls -lh ~/backups
-  267  ./backup_home.sh
-  268  ls -lh ~/backups
-  269  chmod +x backup_home.sh
-  270  nano backup_home.sh
-  271  ls -lh ~/pedrito 
-  272  ls -lh ~/pedrito.txt 
-  273  nano backup_home.sh
-  274  clear
-  275  nano backup_home.sh
-  276  chmod +x backup_home.sh
-  277  ./backup_home.sh
-  278  nano pedrito.txt
-  279  ls -lh ~/pedrito.txt
-  280  ls -lh ~/pedrito
-  281  ls -lh ~/pedrito.txt
-    nano backup_home.sh
-   ls -lh ~/pedrito.txt
-  285  nano ip_guardada.sh
-  286  chmod +x ip_guardada.sh 
-  287  ./ip_guardada.sh 
-  288  nano ip_guardada.sh
-  289  ./ip_guardada.sh 
-  290  nano ip_guardada.sh
-  291  ./ip_guardada.sh 
-  292  nano ip_guardada.sh
-  293  ./ip_guardada.sh 
-  294  cat ~/ESCRITORIO/rico 
-  295  cat ~/Escritorio/rico.txt  
-  296  chmod +x ip_guardada.sh 
-  297  ./ip_guardada.sh 
-  298  ifconfig 
-  299  cat ~/Escritorio/feliz.txt
-  300  less ~/Escritorio/feliz.txtt
-  301  nano feliz.txt
-  302  nano ip_guardada.sh
-  303  chmod +x ip_guardada.sh 
-  304  ./ip_guardada.sh 
-  305  cd /home/gabriel 
-  306  cd feliz.txt 
+buscamos el usuario al que le cambiaremos la contraseña 
+borramos desde el primer dos puntos hasta el siguiente dos puntos
+ctrl x y
+passwd gabriel
+iniciamos el proceso init
+exec /sbin/init
 
 
-#!/bin/bash
+práctica 2
 
-FECHA_ACTUAL= $(date +"%d-%m-%Y: %H: %M ")
-pedrito"backup_home_${FECHA_ACTUAL }..tar.gz "
-pedrito="home/backups"
+punto 1
+primero que nada accedemos a la carpeta que creé para guardar los scrips
+cd /home/gabriel/scripts
 
-mkdir -p "$pedrito"
+creamos el adriático
+nano backup.sh
 
-echo"creando backup de /home/$(whoami)... "
-tar -czf "pedrito.txt/$pedrito " -c /home "$(whoami)"
+#! /bin/bash
 
-#!/bin/bash
+fecha=$(date +"%d-%m-%Y:%H: %M* )
+carpeta_origen="/home/gabriel* backup_destino="/home/gabriel/backups/backup_$fecha.tar.gz"
 
-echo "Ingrese el nombre del archivo (sin extensión):"
-read nombre_archivo
+sudo mkdir -p /home/gabriel/backups tar -czvfe"$backup_destino" "$carpeta origen"
+echo "BACKUP CREADO EN: $backup_destino"
 
-# Definir la ruta del escritorio del usuario
-ESCRITORIO="$HOME/Escritorio"
+./backup.sh
 
-# Ejecutar ifconfig y guardar el resultado en el archivo
-ifconfig > "$ESCRITORIO/$nombre_archivo.txt"
 
-# Mensaje de confirmación
-echo "El resultado de ifconfig se ha guardado en $ESCRITORIO/$nombre_archivo.txt" 
+punto 2
+cd /home/gabriel/scripts
+touch copiar_ifconfig.sh
+nano copiar_ifconfig.sh
+#! /bin/bash
+
+echo "Ingrese el nombre del archivo(sin extension):* read nombre_archivo
+ruta_archivo=*/home/michelle20241430/Desktop/$(nombre_archivo}.txt"
+ifconfig > "$ruta_archivo"
+echo *EL RESULTADO DE IFCONFIG SE HA GUARDADO EN: Sruta_archivo"
+
+chmod +x copiar_ifconfig.sh
+./copiar_ifconfig.sh
+ifconfig_backup
+
+nano copiar_ifconfig.sh 
+
+Práctica 3: SSH y Llaves Pública/Privada
+Paso 1: Configurar Red en modo Bridge (Puente)
+En VirtualBox/VMware: Apaga la VM. Ve a Configuración > Red.
+
+Cambia "NAT" a "Adaptador Puente" (Bridged Adapter). Selecciona tu tarjeta de red física (la que te da internet en Windows).
+
+Enciende la VM.
+
+En Kali, verifica tu IP: ip a. Debería ser una IP del mismo rango que tu Windows (ej. 192.168.1.x).
+
+Prueba de Ping (desde Windows): Abre CMD en Windows y escribe ping <IP_DE_KALI>. Si responde, tienes conexión.
+
+Paso 2: Habilitar SSH en Kali
+En la terminal de Kali:
+
+Bash
+
+sudo systemctl enable ssh
+sudo systemctl start ssh
+sudo systemctl status ssh
+
+
+Prueba inicial: Desde CMD o PowerShell en Windows: ssh tu_usuario_kali@ip_de_kali (Te pedirá contraseña).
+
+ Generar Llaves en Windows
+Abre PowerShell o CMD en Windows.
+
+comando
+
+ssh-keygen -t rsa
+Te preguntará dónde guardarla. Presiona Enter (para dejar la ruta por defecto).
+
+Te pedirá "Passphrase". Déjalo en blanco (presiona Enter dos veces).
+
+Esto creará dos archivos en C:\Users\TuUsuario\.ssh\: id_rsa (privada) y id_rsa.pub (pública).
+
+ Copiar la llave pública al servidor (Kali)
+Dado que Windows no siempre trae el comando ssh-copy-id por defecto, usaremos este comando en PowerShell para enviar la llave:
+
+Reemplaza usuario por tu usuario de Kali y ip_de_kali por la IP:
+
+ Prueba Final (Login sin contraseña)
+Desde PowerShell en Windows, intenta conectar de nuevo:
 
 
 
-practica 3: SSH llave privada y publica 
-ifconfig 
-    sudo apt install openssh-server -y
-    sudo apt update 
-    clear 
-    sudo systemctl status ssh 
-    mkdir -p ~/ssh 
-    chmod 700 ~/ .ssh 
-    touch ~/authorized_keys 
-    chmod 600 ~/authorized_keys 
-    cd ~/.ssh
-    touch ~/authorized_keys  
-    chmod 600 ~/authorized_keys \n
-    sudo nano authorized_keys \n
-    cat authorized_keys 
-    clear 
-    cat authorized_keys 
-    sudo nano authorized_keys \n
-    cd ..
-    sudo nano authorized_keys \n
-
-
+ssh usuario@ip_de_kali
