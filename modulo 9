@@ -1,470 +1,249 @@
-==== Practica 1 Instalacion de Webmin ====
+# PRACTICA 1: INSTALACIÓN DE WEBMIN
+
+## Paso 1: Actualizar paquetes
+apt update
+apt upgrade -y
+
+## Paso 2: Instalar dependencias
+apt install software-properties-common apt-transport-https wget -y
+
+## Paso 3: Importar la clave GPG de Webmin
+wget -qO - http://www.webmin.com/jcameron-key.asc | apt-key add -
+
+## Paso 4: Agregar el repositorio
+add-apt-repository "deb http://download.webmin.com/download/repository sarge contrib"
+
+## Paso 5: Instalar Webmin
+apt update
+apt install webmin -y
+
+## Paso 6: Acceder a Webmin desde el navegador
+https://TU-IP:10000
+
+## Paso 7: Mostrar opciones de administración que se pueden ejecutar vía Webmin
+- Administración de usuarios: crear y eliminar cuentas
+- Gestión de servicios: iniciar, detener y reiniciar servicios (ej. SSH)
+- Configuración de red: asignar IP estática
+- Administración de software: instalar, actualizar y eliminar paquetes
+- Gestión de archivos y directorios: explorar, editar y eliminar archivos
+- Monitorización del sistema: memoria, procesador y almacenamiento
+
+## NOTAS, ERRORES Y SOLUCIONES
+- Error: No se puede acceder al puerto 10000  
+  Causa: Firewall bloqueando el puerto  
+  Solución: ufw allow 10000  
+- Error: Webmin no instala por firma inválida  
+  Causa: Clave GPG no agregada  
+  Solución: Repetir el comando de importar clave  
+- Error: Acceso denegado  
+  Causa: Usuario root deshabilitado  
+  Solución: Usar usuario con permisos sudo  
+
+## TÉRMINOS IMPORTANTES
+- Webmin: Panel web de administración para sistemas Linux.
+- GPG: Sistema para validar firmas de software.
+- Repositorio: Fuente de instalación de paquetes.
+- Firewall: Sistema que controla conexiones de red.
 
 
-Actualizar los paquetes
+# PRACTICA 2: DESPLIEGUE DE VM CON TERRAFORM EN DIGITALOCEAN
 
-```
-sudo apt update
-```
+## Paso 1: Instalar Terraform
+curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+apt update
+apt install terraform -y
 
-Descargar webmin
-```
-wget http://prdownloads.sourceforge.net/webadmin/webmin_2.105_all.deb
-```
+## Paso 2: Inicializar directorio de trabajo
+mkdir terraform-do
+cd terraform-do
 
-Instalar dependencias necesarias
-
-```
-sudo apt install perl libnet-ssleay-perl libauthen-pam-perl libio-pty-perl apt-show-versions -y
-```
-
-Instalar Webmin
-```
-sudo dpkg -i webmin_2.105_all.deb
-```
-
-acceder a webmin
-```
-https://localhost:10000
-```
-
-
-1. Administración de usuario 
--Crear cuenta de usuario
-Sistema > Users and Groups > Create a new user
-
-Verificar la creación del usuario en la lista de usuarios
-```
-```
-cut -d: -f1 /etc/passwd
-```
-
-verificar el usuario 
-```bash 
-getent passwd michelle
-```
-
-y borramos el usuario
-
-2. Gestion de servicios (ssh)
-System > bootup and shutdown
-
-verificamos el servicio a ver si esta activo
-```bash
-sudo systemctl status ssh
-```
-
-desactivamos 
-reiniciamos
-
-3. Configuracion de red (IP estatica)
-
-
-4. Administracion de software
-System > Software Packages
-
-Instalar un paquete (seccion From APT)
-```
-htop
-```
-
-Actualizamos 
-**esde Webmin (para todo):**
-
-- Ve a `System > Software Package Updates`
-    
-- Haz clic en **Update selected packages** o **Update all packages**
-    
--
-
-desinstalar
-
-software package
-search for package
-
-
-
-
-y verificamos la terminal con 
-```
-dpkg -l | grep htop
-```
-
-
-
-dashboard
-
-==== Practica 2 Desplieque de una VM con terraform en digital Ocean ====
-
-
-
-Pasos Terminal 
-
-1. Instalar Terraform 
-actualizamos los paquetes
-```
-sudo apt update
-```
-
-Instalar las dependencias necesarias
-```
-sudo apt install -y gnupg software-properties-common curl
-```
-
-Agregar la clave GPG de hashiCorp
-
-```
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-```
-
-Agregar el repositorio de HashiCorp
-```
-sudo apt update && sudo apt install -y gnupg software-properties-common curl
-sudo apt-add-repository "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-```
-
-Instalar Terraform
-```
-sudo apt update
-sudo apt install terraform -y
-```
-
-Verificar la Instalacion 
-```
-terraform -v
-```
-
-
-2. Generar la llave ssh 
-```
-ssh-keygen -t rsa -b 4096 -C "michelita-key"
-```
-
-Ver la llave publica
-```
-cat ~/.ssh/id_rsa.pub
-```
-
-
-Vamos a Digital Ocean 
-
-Crear Clave SSH(settings > security) ponemos lo que nos genero el keygen en la terminal 
-
-Fingerprint
-```
-96:77:1f:2e:6f:6d:32:f0:4f:5d:b7:82:9c:3b:d9:5a
-```
-
-Crear Api 
-```
-dop_v1_16527850af1fafcf909422263af1e1929674c36bc62cb798a8f49f0b50b54387
-```
-
-
-Volvemos a la terminal 
-
-creamos el archivo main.tf
-```
-sudo nano main.tf
-```
-
-```
+## Paso 3: Crear archivo provider.tf
+cat <<EOF > provider.tf
 terraform {
   required_providers {
     digitalocean = {
       source = "digitalocean/digitalocean"
+      version = "2.0.0"
     }
   }
 }
-
 provider "digitalocean" {
-  token = "d"
+  token = var.do_token
 }
+EOF
 
+## Paso 4: Crear archivo variables.tf
+cat <<EOF > variables.tf
+variable "do_token" {}
+variable "ssh_key" {}
+EOF
+
+## Paso 5: Crear archivo main.tf
+cat <<EOF > main.tf
 resource "digitalocean_droplet" "os3vm" {
-  name   = "OS3vm"
   image  = "ubuntu-22-04-x64"
+  name   = "OS3vm"
   region = "nyc1"
   size   = "s-1vcpu-1gb"
-
-  # Usar la llave SSH pública proporcionada para acceso
-  ssh_keys = [""]
-
-  tags = ["OS3vm"]
+  ssh_keys = [ var.ssh_key ]
 }
+EOF
 
-output "ip_address" {
-  value = digitalocean_droplet.os3vm.ipv4_address
-}
+## Paso 6: Crear archivo terraform.tfvars
+cat <<EOF > terraform.tfvars
+do_token = "TOKEN_AQUI"
+ssh_key = "FINGERPRINT_O_LLAVE_AQUI"
+EOF
 
-```
-
-Inicializar Terraform
-```
+## Paso 7: Inicializar Terraform
 terraform init
-```
 
-Planificar el despliegue para que todo este bien configurado
-```
+## Paso 8: Previsualizar cambios
 terraform plan
-```
 
-Aplicar el despliegue
-```
-terraform apply
-```
+## Paso 9: Crear la VM
+terraform apply -auto-approve
 
-para acceder a la vm 
+## Paso 10: Validar acceso SSH
+ssh root@IP_DE_LA_VM
 
-```
-ssh root@ipdelamaquina
-```
+## NOTAS, ERRORES Y SOLUCIONES
+- Error: Provider no encontrado  
+  Solución: terraform init  
+- Error: Authentication failed  
+  Causa: SSH Key incorrecta  
+  Solución: Revisar fingerprint en DigitalOcean  
+- Error: Token inválido  
+  Solución: Regenerar token API en DO  
 
-
-==== Practica 3 Instalación de Ansible ====
-
-
-Vm-server
-
-Instalamos Ansible
-```
-sudo apt update && sudo apt install ansible -y
-```
-
-creamos la carpeta y accedemos
-```
-sudo mkdir -p /etc/ansible
-cd /etc/ansible
-```
-
-creamos un archivo para definir la configuracion de ansible
-```
-[defaults]
-inventory = /etc/ansible/hosts 
-private_key_file = /home/ansible/.ssh/id_rsa hosts_key_checking = False 
-ask_become_pass = True
-
-[ssh_connection]
-ssh_args = -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s
-```
-
-creamos el archivo hosts
-
-```
-[win] 
-192.168.100.45
-
-[win:vars] 
-ansible_user=ansible 
-ansible_password=1234
-ansible_port=5985 
-ansible_connection=winrm 
-ansible_winrm_transport=basic ansible_winrm_server_cert_validation=ignore 
-
-[linux] 
+## TÉRMINOS IMPORTANTES
+- Terraform: Herramienta IaC para crear infraestructura.
+- Token: Llave de autenticación para API.
+- Fingerprint: Identificador único de la llave SSH.
+- Droplet: Nombre de las máquinas virtuales en DigitalOcean.
 
 
-[linux:vars] ansible_user=ansible 
-ansible_ssh_private_key_file=~/.ssh/id_rsa 
-ansible_become_password=1234
-```
+# PRACTICA 3: INSTALACIÓN DE ANSIBLE
 
-generamos la llave
-```
-ssh-keygen -t rsa -b 4096
-```
+## Paso 1: Instalar Ansible en la VM-Server
+apt update
+apt install ansible -y
 
-vamos a acceder a la carpeta de ssh
-```
-cd ~/.ssh
-ls
-```
-
-verifcamos la llave
-```
-cat id_rsa.pub
-```
-
-Accedemos a la VM-Digital Ocean
-
-Vamos a crear el usuario
-```
+## Paso 2: Crear usuario ansible en Linux
 adduser ansible
-```
-
-lo agregamos al siguiente grupo
-```
 usermod -aG sudo ansible
-```
 
-```
-chsh -s /bin/bash ansible
-```
+## Paso 3: Generar llave SSH sin contraseña
+su - ansible
+ssh-keygen -t ed25519
 
+## Paso 4: Copiar llave pública al host Linux
+ssh-copy-id usuario@IP_DE_LINUX
 
-Accedemos al usuario
-```
-su ansible
-```
+## Paso 5: Configurar Windows para Ansible (WinRM)
+winrm quickconfig
 
-creamos una carpeta para agregar la llave publica del server
-```
-mkdir ~/.ssh
-nano ~/.ssh/authorized_keys
-```
+## Paso 6: Crear usuario ansible con permisos de administrador en Windows
+net user ansible /add
+net localgroup administrators ansible /add
 
-Asignamos los permisos a la carpeta
-```
-chmod 600 ~/.ssh/authorized_keys
-```
+## Paso 7: Configurar inventario en /etc/ansible/hosts
+cat <<EOF > /etc/ansible/hosts
+[win]
+IP_DE_WINDOWS
 
-probamos el ping en la vm linux
-```
-ansible linux -m ping -u ansible
-```
+[linux]
+IP_DE_LINUX
+EOF
 
-En la maquina windows
-
-```
-desactivamos el firewall
-```
-
-Ingresamos a powershell en modo administrador
-
-
-```
-Set-ExecutionPolicy RemoteSigned -Force
-Enable-PSRemoting -Force
-Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
-Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true
-Set-Item WSMan:\localhost\Client\TrustedHosts -Value "*" -Force
-netsh advfirewall firewall add rule name="WinRM HTTP" dir=in action=allow protocol=TCP localport=5985
-netsh advfirewall firewall set rule group="Administración remota de Windows" new enable=yes
-Restart-Service WinRM
-$Password = ConvertTo-SecureString "1234" -AsPlainText -Force
-New-LocalUser -Name "ansible" -Password $Password -FullName "Ansible User" -Description "Usuario para Ansible"
-Add-LocalGroupMember -Group "Administradores" -Member "ansible"
-winrm enumerate winrm/config/listener
-Test-NetConnection -ComputerName localhost -Port 5985
-```
-
-probamos el ping 
-```
+## Paso 8: Probar la conexión con módulo ping
 ansible win -m win_ping
-```
+ansible linux -m ping
+
+## NOTAS, ERRORES Y SOLUCIONES
+- Error: win_ping falla  
+  Causa: WinRM no configurado  
+  Solución: Ejecutar winrm quickconfig  
+- Error: Permiso denegado SSH  
+  Solución: Revisar llaves y permisos en .ssh  
+- Error: Host unreachable  
+  Causa: Firewall  
+  Solución: Habilitar puertos 5985/5986 en Windows  
+
+## TÉRMINOS IMPORTANTES
+- Ansible: Herramienta de automatización.
+- Inventario: Lista de máquinas administradas.
+- WinRM: Protocolo de administración remota en Windows.
+- SSH: Protocolo seguro de conexión remota.
 
 
+# PRACTICA 4: COMANDOS AD-HOC CON ANSIBLE
 
-==== Practica 4 Comandos Ad-Hoc ====
+## Paso 1: Copiar archivo txt del escritorio al documentos (Windows)
+ansible win -m win_copy -a "src=/home/ansible2/Escritorio/archivo.txt dest=C:/Users/ansible/Documents/archivo.txt"
+
+## Paso 2: Reiniciar la VM ansible1 (Linux)
+ansible linux -m reboot
+
+## NOTAS, ERRORES Y SOLUCIONES
+- Error en win_copy: Ruta inválida  
+  Solución: Verificar rutas absolutas  
+- Error en reboot: Usuario sin sudo  
+  Solución: Agregar usuario en sudoers  
+
+## TÉRMINOS IMPORTANTES
+- Ad-Hoc: Comandos rápidos sin playbooks.
+- win_copy: Módulo para copiar archivos a Windows.
+- reboot: Módulo para reiniciar sistemas.
 
 
-1. Copiar  el archivo txt del escritorio a documentos en la maquina windows
+# PRACTICA 5: PLAYBOOKS
 
-```
-ansible win -i /etc/ansible/hosts -m win_shell -a "Move-Item -Path 'C:/Users/michelita/Desktop/michele.txt' -Destination 'C:/Users/michelita/Documents/'"
-```
-
-Reiniciar la maquia digital ocean
-
-```
-ansible linux -i /etc/ansible/hosts -m reboot --become
-```
-
-==== Practica 5 Playbooks ====
-
-
-Vamos a nuestra maquina windows y verificamos que no esta notepad
-
-En Linux
-
-```
-sudo nano install_notepad.yml
-```
-
-pegamos 
-
-```
-- name: Descargar e instalar Notepad++ en Windows
-  hosts: win
+## Paso 1: Crear playbook para instalar Notepad++ en Windows
+cat <<EOF > install_notepad.yml
+- hosts: win
   tasks:
-    - name: Descargar instalador de Notepad++
-      win_get_url:
-        url: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.5.3/npp.8.5.3.Installer.x64.exe
-        dest: C:\Users\michelita\Downloads\npp_installer.exe
-
-    - name: Ejecutar el instalador de Notepad++
-      win_package:
-        path: C:\Users\michelita\Downloads\npp_installer.exe
-        arguments: /S
+    - name: Instalar Notepad++
+      win_chocolatey:
+        name: notepadplusplus
         state: present
+EOF
 
-    - name: Verificar si Notepad++ está instalado
-      win_stat:
-        path: C:\Program Files\Notepad++\notepad++.exe
-      register: resultado_npp
-
-    - name: Confirmar instalación exitosa
-      debug:
-        msg: "Notepad++ está instalado correctamente."
-      when: resultado_npp.stat.exists
-```
-
-ejecutarlo 
-```
+## Paso 2: Ejecutar playbook de Windows
 ansible-playbook install_notepad.yml
-```
 
-Accedemos a notepad
-
-el siguiente playbook
-
-```
-sudo nano actualizar_repositorios.yml
-```
-
-```
-- name: Actualizar los repositorios del sistema
-  hosts: linux
+## Paso 3: Crear playbook para instalar NGINX en Linux
+cat <<EOF > install_nginx.yml
+- hosts: linux
   become: yes
   tasks:
-    - name: Actualizar la lista de paquetes
+    - name: Instalar NGINX
       apt:
+        name: nginx
+        state: present
         update_cache: yes
-      register: resultado
 
-    - name: Mostrar resultado de la actualización
-      debug:
-        var: resultado
-```
+    - name: Iniciar NGINX
+      service:
+        name: nginx
+        state: started
+EOF
 
-- name: Crear usuario y configurar en Windows
-  hosts: windows
-  gather_facts: no
-  tasks:
-    - name: Crear nuevo usuario
-      ansible.windows.win_user:
-        name: nuevo_usuario
-        password: "ContraseñaSegura123!"
-        state: present
-        groups:
-          - Administradores
-        update_password: on_create
-        password_never_expires: yes
-        user_cannot_change_password: no
+## Paso 4: Ejecutar playbook de Linux
+ansible-playbook install_nginx.yml
 
-    - name: Descargar instalador de Notepad++
-      ansible.windows.win_get_url:
-        url: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/latest/download/npp.8.6.3.Installer.x64.exe
-        dest: C:\Temp\npp_installer.exe
+## NOTAS, ERRORES Y SOLUCIONES
+- Error: win_chocolatey no encontrado  
+  Solución: Instalar Chocolatey en Windows  
+- Error: apt lock  
+  Solución: Esperar a que termine otro proceso de apt  
+- Error: service falló  
+  Causa: Puerto 80 ocupado  
+  Solución: Liberar puerto o cambiar configuración  
 
-    - name: Instalar Notepad++
-      ansible.windows.win_package:
-        path: C:\Temp\npp_installer.exe
-        arguments: /S
-        state: present
-
-para hacerlo 
-```
-ansible-playbook actualizar_repositorios.yml
-```
-
+## TÉRMINOS IMPORTANTES
+- Playbook: Archivo YAML con tareas automatizadas.
+- Chocolatey: Gestor de paquetes para Windows.
+- Service: Módulo para administrar servicios en Linux.
+- apt: Gestor de paquetes de Debian/Ubuntu.
