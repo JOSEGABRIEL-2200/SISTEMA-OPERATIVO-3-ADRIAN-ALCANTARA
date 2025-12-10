@@ -1,0 +1,81 @@
+****************** PRACTICA X: ISSABEL  ********************************************
+
+1-) CREAR LA MAQUINA EN DIGITAL OCEAN:
+
+1- Tiene que ser Rocky Linux 8 
+
+2- Ingresar por SSH 
+
+=========================================================================================
+
+2-) INSTALAR ISSABEL: 
+
+1- yum update 
+
+2- yum install wget -y 
+
+3- wget http://repo.issabel.org/issabel5-netinstall.sh
+
+4- chmod 700 issabel5-netinstall.sh 
+
+5- ./issabel5-netinstall.sh
+
+7- Te saldra un menu donde tienes que seleccionar el idioma, lo pones en ingles.
+
+8- Luego te saldra algo como ( ) 16 <====== Lo pones ahi 
+
+9- Te aparecera Choose additional package (s) to install:
+
+[*] Issabel Netowrk Licensed modules <======== Solo deja con * esta opcion, las demas se los quitas.
+
+10- No hagas nada, se va a instalar solo despues de ahi.
+
+11 Te pedira que pongas una contra: Siempre pon
+
+Omar2005
+
+12- Te saldran dos opciones
+
+( ) chan_sip 
+
+(*) chan_pjsip <===== SELECCIONA ESTA
+
+13- Luego le das a:
+
+Naaah, get a real job
+
+14- A veces se buguea y se queda en la vaina de Rebooting Server. Pero ve al navegador y pon la ip de la la maquina de digital ocean (EL NAVEGADOR PUEDE SER DESDE TU MAQUINA HOST)
+
+15- Te aparecera un login:
+
+admin <======= USUARIO
+
+Omar2005 <========= CONTRA
+
+=======================================================================================================
+
+3-) Ya la interfaz grafica, te aparecera que te registres, simplemente dale a la x.
+
+4- Busca donde dice PBX > Applications > Extensions > Submit:
+
+User Extension: 2220 <=========== LA DEL PROFESOR.
+
+Display Name: Profesor Adrian 
+
+Y luego baja a donde dice "secret" y pon:
+
+Teletubies123$ 
+
+Y ya, lo demas dejalo por defecto, ve abajo y dale a submit. 
+
+Y LUEGO DALE A APPLY, SI NO LE DAS A APPLY NO FUNCIONA. <========= OJO.
+
+
+
+
+Instalar MicroSIP <======= PERO NO LO TIENES QUE HACER PORQUE SE SUPONE QUE YA LO TIENES INSTALADO. 
+
+============================================================================================================
+
+
+systemctl stop fail2ban
